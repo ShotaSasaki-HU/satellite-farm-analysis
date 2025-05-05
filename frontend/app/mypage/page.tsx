@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight } from "lucide-react";
+import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut } from "lucide-react";
 
 export default function Dashboard() {
     const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
@@ -11,34 +11,47 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-white flex">
             {/* Sidebar */}
-            <div className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg`}>
-                <div className={`flex items-center h-16 ${isSidebarOpen ? "justify-between": "justify-center"}`}>
-                    <h2 className={`text-2xl text-center font-bold py-2 truncate ${isSidebarOpen ? "" : "hidden"}`}>メニュー</h2>
-                    <button
-                        className="text-gray-500"
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)} // 開閉のトグル
-                    >
-                        {isSidebarOpen ? <CircleChevronLeft className="w-10 h-10" /> : <CircleChevronRight className="w-10 h-10" />}
-                    </button>
+            <div className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg flex flex-col justify-between`}>
+                {/* メニュー上部 */}
+                <div>
+                    <div className={`flex items-center h-16 ${isSidebarOpen ? "justify-between" : "justify-center"}`}>
+                        <h2 className={`text-2xl text-center font-bold py-2 truncate ${isSidebarOpen ? "" : "hidden"}`}>メニュー</h2>
+                        <button
+                            className="text-gray-500"
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)} // 開閉のトグル
+                        >
+                            {isSidebarOpen ? <CircleChevronLeft className="w-10 h-10" /> : <CircleChevronRight className="w-10 h-10" />}
+                        </button>
+                    </div>
+                    <ul className="text-xl">
+                        <li
+                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                            onClick={() => setSelected("account")}
+                        >
+                            <User className="w-10 h-10 shrink-0" />{isSidebarOpen && "アカウント情報"}
+                        </li>
+                        <li
+                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                            onClick={() => setSelected("map")}
+                        >
+                            <Map className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を選ぶ"}
+                        </li>
+                        <li
+                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                            onClick={() => setSelected("analyze")}
+                        >
+                            <ChartLine className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を分析する"}
+                        </li>
+                    </ul>
                 </div>
-                <ul className="text-xl">
+
+                {/* メニュー下部（ログアウトボタン） */}
+                <ul className="text-xl mb-2.5">
                     <li
-                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                        onClick={() => setSelected("account")}
+                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-red-300 rounded-xl cursor-pointer truncate ${selected === "logout" ? "bg-red-100 border-red-300" : "border-red-300"}`}
+                        onClick={() => setSelected("logout")}
                     >
-                        <User className="w-10 h-10 shrink-0" />{isSidebarOpen && "アカウント情報"}
-                    </li>
-                    <li
-                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                        onClick={() => setSelected("map")}
-                    >
-                        <Map className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を選ぶ"}
-                    </li>
-                    <li
-                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                        onClick={() => setSelected("analyze")}
-                    >
-                        <ChartLine className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を分析する"}
+                        <LogOut className="w-10 h-10 shrink-0" />{isSidebarOpen && "ログアウト"}
                     </li>
                 </ul>
             </div>
