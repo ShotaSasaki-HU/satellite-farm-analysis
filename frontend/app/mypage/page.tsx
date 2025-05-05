@@ -112,7 +112,7 @@ export default function Mypage() {
                 <div className="select-none">
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
-                        <p>{userName} 様</p>
+                        <p className="text-xl">{userName} 様</p>
                     </div>
                     {selected === "account" && (
                         <div className="text-center">
