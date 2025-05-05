@@ -1,16 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { login } from "@/lib/auth"; // login関数
 
 export default function LoginPage() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const router = useRouter();
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [error, setError] = useState<string>("");
 
-    // フォームが送信された時の処理
+    // フォーム送信の処理
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // ここでAPIにPOSTしてログイン処理
-        console.log("ログイン:", { username, password });
+        setError("");
+
+        // APIにPOSTしてログイン処理
+        try {
+            const data = await login(email, password);
+            console.log("ログイン成功", data);
+            router.push("/mypage")
+        } catch (err: any) {
+            setError(err.message);
+        }
     };
 
     return (
@@ -20,11 +32,13 @@ export default function LoginPage() {
         >
             <div className="bg-white bg-opacity-80 rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
                 <h1 className="text-2xl font-bold mb-6 text-center text-green-800 text-4xl italic">Agri-Eye</h1>
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-gray-700">メールアドレス</label>
                         <input
                             type="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="example@example.com"
                         />
@@ -33,6 +47,8 @@ export default function LoginPage() {
                         <label className="block text-gray-700">パスワード</label>
                         <input
                             type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder=""
                         />
@@ -43,13 +59,13 @@ export default function LoginPage() {
                     >
                         ログイン
                     </button>
-                    <button
-                        type="submit"
-                        className="w-full bg-white-900 hover:bg-gray-300 text-green-600 py-2.5 rounded-md transition text-xl border border-green-600"
-                    >
-                        新規登録
-                    </button>
                 </form>
+                <button
+                    type="submit"
+                    className="w-full bg-white-900 hover:bg-gray-300 text-green-600 mt-4 py-2.5 rounded-md transition text-xl border border-green-600"
+                >
+                    新規登録
+                </button>
             </div>
         </div>
     );
