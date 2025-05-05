@@ -96,6 +96,11 @@ def login(data: LoginRequest, response: Response, db: db_dependency):
 def read_profile(current_user: User = Depends(get_current_user)):
     return {"name": current_user.name, "email": current_user.email}
 
+@app.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("access_token")
+    return {"message": "ログアウトしました"}
+
 # 開発用サーバー起動
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)

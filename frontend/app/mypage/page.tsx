@@ -20,6 +20,7 @@ export default function Mypage() {
 
                 if (!res.ok) {
                     console.error("プロフィールの取得に失敗しました。");
+                    window.location.href = "/login";
                     return;
                 }
 
@@ -33,6 +34,30 @@ export default function Mypage() {
 
         fetchProfile(); // useEffectは非同期にできないので中で非同期として定義して呼び出す。
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/logout", {
+                method: "POST",
+                credentials: "include", // HttpOnly Cookie を使っているなら必須
+            });
+
+            if (!res.ok) {
+                console.error("ログアウトに失敗しました");
+                return;
+            }
+
+            // 必要なら状態をクリアするなど
+            console.log("ログアウト成功");
+            setUserName("");
+            setUserEmail("");
+
+            // 画面遷移
+            window.location.href = "/login"; // 全体をリロードしたいのでrouter.push()ではなくコレを使う。
+        } catch (error) {
+            console.error("通信エラー:", error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white flex">
@@ -75,7 +100,7 @@ export default function Mypage() {
                 <ul className="text-xl mb-2.5">
                     <li
                         className="flex items-center gap-2 p-3 my-1 border-2 border-red-300 rounded-xl cursor-pointer"
-                        onClick={() => { }}
+                        onClick={() => handleLogout()}
                     >
                         <LogOut className="w-10 h-10 shrink-0" />{isSidebarOpen && "ログアウト"}
                     </li>
@@ -87,7 +112,7 @@ export default function Mypage() {
                 <div className="select-none">
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
-                        <p>{userName} さん</p>
+                        <p>{userName} 様</p>
                     </div>
                     {selected === "account" && (
                         <div className="text-center">
