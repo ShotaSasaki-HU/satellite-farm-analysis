@@ -7,7 +7,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Cookie
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from database import SessionLocal
@@ -31,9 +31,6 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 ### トークン付きのアクセス制限（認証ガード）ココカラ ###
 
-# tokenUrl="login"は、「そこに行ってトークンを取得するよ」とSwagger UIに教えているだけ。
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="profile") # トークン取得エンドポイント名
-
 def get_db():
     db = SessionLocal()
     try:
@@ -41,10 +38,20 @@ def get_db():
     finally:
         db.close()
 
+def get_token_from_cookie(access_token: str | None = Cookie(default=None)):
+    if(access_token is None):
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return access_token
+
 # Depends(oauth2_scheme)によって、tokenにリクエストヘッダのトークン文字列が自動で入る。
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(access_token: str = Depends(get_token_from_cookie), db: Session = Depends(get_db)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("sub")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid token")

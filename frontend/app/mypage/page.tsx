@@ -13,7 +13,7 @@ export default function Mypage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch("http://127.0.0.1:8000/profile", {
+                const res = await fetch("http://localhost:8000/profile", {
                     method: "GET",
                     credentials: "include", // これが HttpOnly Cookie の場合に必須
                 });
@@ -86,8 +86,8 @@ export default function Mypage() {
             <div className="main flex-1 p-6">
                 <div className="select-none">
                     <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-3xl font-bold text-green-800 italic bg-red-100">Agri-Eye</h1>
-                        <p className="bg-red-100">{userName} さん</p>
+                        <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
+                        <p>{userName} さん</p>
                     </div>
                     {selected === "account" && (
                         <div className="text-center">

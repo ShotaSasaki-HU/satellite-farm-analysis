@@ -1,7 +1,7 @@
 // app/lib/auth.ts
 
 export async function login(email: string, password: string) {
-    const res = await fetch("http://127.0.0.1:8000/login", {
+    const res = await fetch("http://localhost:8000/login", {
         method: "POST",
         credentials: "include",
         headers: {

@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, HTTPException, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
-# import uvicorn
+import uvicorn
 from pydantic import BaseModel
 from database import SessionLocal, engine # database.py
 from models import Base, User # models.py
@@ -64,7 +64,7 @@ app.add_middleware(
     allow_headers=["*"],                     # Authorization や Content-Type も許可
 )
 
-@app.post("/login")
+@app.post("/login", response_model=None)
 def login(data: LoginRequest, response: Response, db: db_dependency):
     user = db.query(User).filter(User.email == data.email).first()
 
@@ -86,7 +86,8 @@ def login(data: LoginRequest, response: Response, db: db_dependency):
         httponly=True,     # Don't forget!
         secure=False,       # Don't forget! HTTPSじゃないと有効にならない（ローカルならFalseでも可）
         samesite="Lax",    # Don't forget! または、Strict。
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        path="/"
     )
 
     return {"message": "ログイン成功"}
@@ -96,5 +97,5 @@ def read_profile(current_user: User = Depends(get_current_user)):
     return {"name": current_user.name, "email": current_user.email}
 
 # 開発用サーバー起動
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
