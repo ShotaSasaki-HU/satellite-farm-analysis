@@ -65,9 +65,9 @@ export default function Mypage() {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex h-screen">
             {/* Sidebar */}
-            <aside className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg flex flex-col justify-between select-none truncate`}>
+            <aside className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg flex flex-col justify-between select-none truncate fixed h-screen`}>
                 {/* メニュー上部 */}
                 <div>
                     <div className={`flex items-center h-16 ${isSidebarOpen ? "justify-between" : "justify-center"}`}>
@@ -113,7 +113,7 @@ export default function Mypage() {
             </aside>
 
             {/* Main area */}
-            <main className="flex-1 p-6">
+            <main className={`flex-1 py-6 pr-6 ${isSidebarOpen ? "pl-70" : "pl-31"}`}> {/* pl = asideの幅w + 6 */}
                 <div className="select-none">
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
