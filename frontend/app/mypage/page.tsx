@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx
+// app/mypage/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -17,7 +17,7 @@ export default function Dashboard() {
                     <div className={`flex items-center h-16 ${isSidebarOpen ? "justify-between" : "justify-center"}`}>
                         <h2 className={`text-2xl text-center font-bold py-2 truncate select-none ${isSidebarOpen ? "" : "hidden"}`}>メニュー</h2>
                         <button
-                            className="text-gray-500"
+                            className="text-gray-500 cursor-pointer"
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)} // 開閉のトグル
                         >
                             {isSidebarOpen ? <CircleChevronLeft className="w-10 h-10" /> : <CircleChevronRight className="w-10 h-10" />}
