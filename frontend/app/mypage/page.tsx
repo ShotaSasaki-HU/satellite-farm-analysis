@@ -2,34 +2,42 @@
 "use client";
 
 import { useState } from "react";
-import { User, Map, ChartLine } from "lucide-react";
+import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight } from "lucide-react";
 
 export default function Dashboard() {
-    const [selected, setSelected] = useState<string>("account");
+    const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
 
     return (
         <div className="min-h-screen bg-white py-8 flex">
             {/* Sidebar */}
-            <div className="sidebar px-4 shadow-lg">
-                <h2 className="text-2xl text-center font-bold py-2">メニュー</h2>
+            <div className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 shadow-lg`}>
+                <div className={`flex items-center ${isSidebarOpen ? "justify-between": "justify-center"}`}>
+                    <h2 className={`text-2xl text-center font-bold py-2 ${isSidebarOpen ? "" : "hidden"}`}>メニュー</h2>
+                    <button
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)} // 開閉のトグル
+                    >
+                        {isSidebarOpen ? <CircleChevronLeft className="w-10 h-10" /> : <CircleChevronRight className="w-10 h-10" />}
+                    </button>
+                </div>
                 <ul className="text-xl">
                     <li
                         className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                         onClick={() => setSelected("account")}
                     >
-                        <User className="w-10 h-10" />アカウント情報
+                        <User className="w-10 h-10" />{isSidebarOpen && "アカウント情報"}
                     </li>
                     <li
                         className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                         onClick={() => setSelected("map")}
                     >
-                        <Map className="w-10 h-10" />農地を選ぶ
+                        <Map className="w-10 h-10" />{isSidebarOpen && "農地を選ぶ"}
                     </li>
                     <li
                         className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                         onClick={() => setSelected("analyze")}
                     >
-                        <ChartLine className="w-10 h-10" />農地を分析する
+                        <ChartLine className="w-10 h-10" />{isSidebarOpen && "農地を分析する"}
                     </li>
                 </ul>
             </div>
@@ -52,7 +60,7 @@ export default function Dashboard() {
                 {selected === "analyze" && (
                     <div className="text-center">
                         <h1 className="text-3xl font-bold text-green-800">農地を分析する</h1>
-                        <p>選んだ農地（関心領域）の分析結果を表示します。</p>
+                        <p>選んだ農地（関心領域）の分析を行います。</p>
                     </div>
                 )}
             </div>
