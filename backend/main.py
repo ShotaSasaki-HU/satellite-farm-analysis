@@ -2,30 +2,58 @@
 
 from fastapi import FastAPI, HTTPException, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
+# import uvicorn
 from pydantic import BaseModel
-from typing import Optional
-import uvicorn
-
-from auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from database import SessionLocal, engine # database.py
+from models import Base, User # models.py
+from sqlalchemy.orm import Session
+from typing import Annotated
+from password_utils import verify_password, hash_password
+from datetime import timedelta
+from auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
 
 app = FastAPI()
 
-# 仮のユーザーデータ
+# データベースにテーブルを作成
+Base.metadata.create_all(bind=engine)
+
+# 仮想ユーザーの登録
+db = SessionLocal()
 fake_user = {
     "email": "test@example.com",
-    "password": "password",  # 本来はハッシュ化されているべき
-    "name": "テストユーザー"
+    "password": hash_password(password="p@ssword"),
+    "name": "開発ユーザー"
 }
+# ユーザーが既に存在しない場合のみ追加
+user_exists = db.query(User).filter(User.email == fake_user["email"]).first()
+if not user_exists:
+    db_user = User(
+        email=fake_user["email"],
+        hashed_password=fake_user["password"],
+        name=fake_user["name"]
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+db.close()
+
+# DBセッションを使えるようにする関数。
+# FastAPIの Depends を使ってエンドポイント内で注入できる。
+def get_db():
+    db = SessionLocal() # セッションの作成
+    try:
+        # yieldの存在よりget_dbはジェネレータ関数
+        # FastAPIでは、レスポンス作成の前にyieldまでが自動で走る。
+        yield db
+    finally: # yield文に続くコードは、レスポンスを作成した後、送信する前に実行される。
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
 
 # リクエスト用モデル
 class LoginRequest(BaseModel):
     email: str
     password: str
-
-# レスポンス用モデル
-class LoginResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
 
 # CORS設定（異なるオリジンからのリクエストを許可）
 app.add_middleware(
@@ -37,26 +65,36 @@ app.add_middleware(
 )
 
 @app.post("/login")
-def login(data: LoginRequest, response: Response):
-    if data.email != fake_user["email"] or data.password != fake_user["password"]:
-        raise HTTPException(status_code=401, detail="メールアドレスまたはパスワードが間違っています")
+def login(data: LoginRequest, response: Response, db: db_dependency):
+    user = db.query(User).filter(User.email == data.email).first()
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="メールアドレスまたはパスワードが間違っています。")
+    if not verify_password(plain_password=data.password, hashed_password=user.hashed_password):
+        raise HTTPException(status_code=401, detail="メールアドレスまたはパスワードが間違っています。")
     
     # JWTを生成
-    token = create_access_token(
-        data={ "sub": data.email},
-        expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
 
+    # HttpOnly
     response.set_cookie(
         key="access_token",
-        value=token,
+        value=access_token,
         httponly=True,     # Don't forget!
-        secure=True,       # Don't forget! HTTPSじゃないと有効にならない（ローカルならFalseでも可）
+        secure=False,       # Don't forget! HTTPSじゃないと有効にならない（ローカルならFalseでも可）
         samesite="Lax",    # Don't forget! または、Strict。
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
+
     return {"message": "ログイン成功"}
 
+@app.get("/profile")
+def read_profile(current_user: User = Depends(get_current_user)):
+    return {"name": current_user.name, "email": current_user.email}
+
 # 開発用サーバー起動
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

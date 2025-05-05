@@ -1,12 +1,38 @@
 // app/mypage/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut } from "lucide-react";
 
-export default function Dashboard() {
+export default function Mypage() {
     const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
+    const [userName, setUserName] = useState<string>("");
+    const [userEmail, setUserEmail] = useState<string>("");
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/profile", {
+                    method: "GET",
+                    credentials: "include", // これが HttpOnly Cookie の場合に必須
+                });
+
+                if (!res.ok) {
+                    console.error("プロフィールの取得に失敗しました。");
+                    return;
+                }
+
+                const data = await res.json();
+                setUserName(data.name); // バックエンドから返ってくるキーに合わせる
+                setUserEmail(data.email);
+            } catch (error) {
+                console.error("通信エラー:", error);
+            }
+        };
+
+        fetchProfile(); // useEffectは非同期にできないので中で非同期として定義して呼び出す。
+    }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
 
     return (
         <div className="min-h-screen bg-white flex">
@@ -59,7 +85,10 @@ export default function Dashboard() {
             {/* Main area */}
             <div className="main flex-1 p-6">
                 <div className="select-none">
-                    <h1 className="text-3xl font-bold mb-6 text-green-800 italic">Agri-Eye</h1>
+                    <div className="flex items-center justify-between mb-6">
+                        <h1 className="text-3xl font-bold text-green-800 italic bg-red-100">Agri-Eye</h1>
+                        <p className="bg-red-100">{userName} さん</p>
+                    </div>
                     {selected === "account" && (
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">アカウント情報</h1>

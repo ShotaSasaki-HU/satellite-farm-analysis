@@ -3,7 +3,20 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base # database.py
 
-# AOI という名前のテーブル定義を開始。Base を継承しているから「このクラスはテーブルです」とSQLAlchemyが認識。
+# User という名前のテーブル定義を開始。Base を継承しているから「このクラスはテーブルです」とSQLAlchemyが認識。
+class User(Base):
+    __tablename__ = "users"
+
+    # よく検索に使うならばindex=True
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    name = Column(String, nullable=False)
+
+    # 双方向リンク（あると便利）
+    # 「このUserクラスのaoisはAOIクラスとつながってるよ。AOI側ではuser属性で戻ってこれるよ。」
+    aois = relationship("AOI", back_populates="user")
+
 class AOI(Base):
     __tablename__ = "aois"
 
@@ -15,15 +28,3 @@ class AOI(Base):
     # 双方向リンク（あると便利）
     # 「このAOIクラスのuserはUserクラスとつながってるよ。User側ではaois属性で戻ってこれるようにしてるよ。」
     user = relationship("User", back_populates="aois")
-
-class User(Base):
-    __tablename__ = "users"
-
-    # よく検索に使うならばindex=True
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True) # 名前の重複禁止
-    hashed_password = Column(String)
-
-    # 双方向リンク（あると便利）
-    # 「このUserクラスのaoisはAOIクラスとつながってるよ。AOI側ではuser属性で戻ってこれるよ。」
-    aois = relationship("AOI", back_populates="user")

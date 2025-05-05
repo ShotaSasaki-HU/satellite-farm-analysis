@@ -1,5 +1,7 @@
 # auth.py: JWT周りの設定
 
+from pathlib import Path
+from dotenv import load_dotenv
 import os
 
 from datetime import datetime, timedelta, timezone
@@ -12,14 +14,16 @@ from database import SessionLocal
 from models import User
 from sqlalchemy.orm import Session
 
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env") # 絶対パス
+
 # 秘密鍵（サーバーだけが知っているキー）
-SECRET_KEY = os.environ['SATELLITE_FARM_ANALYSIS_JWT_SECRET_KEY'] # 必ず環境変数から読み込むべし
+SECRET_KEY = os.getenv('SATELLITE_FARM_ANALYSIS_JWT_SECRET_KEY') # 必ず環境変数から読み込むべし
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def create_access_token(data: dict, expires_delta: timedelta = ACCESS_TOKEN_EXPIRE_MINUTES):
+def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (timedelta(minutes=expires_delta) or timedelta(minutes=15))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     # encodeすると、ヘッダーは自動で生成される。
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -28,7 +32,7 @@ def create_access_token(data: dict, expires_delta: timedelta = ACCESS_TOKEN_EXPI
 ### トークン付きのアクセス制限（認証ガード）ココカラ ###
 
 # tokenUrl="login"は、「そこに行ってトークンを取得するよ」とSwagger UIに教えているだけ。
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login") # トークン取得エンドポイント名
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="profile") # トークン取得エンドポイント名
 
 def get_db():
     db = SessionLocal()
