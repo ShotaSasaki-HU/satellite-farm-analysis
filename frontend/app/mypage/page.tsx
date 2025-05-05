@@ -9,12 +9,13 @@ export default function Dashboard() {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
 
     return (
-        <div className="min-h-screen bg-white py-8 flex">
+        <div className="min-h-screen bg-white flex">
             {/* Sidebar */}
-            <div className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 shadow-lg`}>
-                <div className={`flex items-center ${isSidebarOpen ? "justify-between": "justify-center"}`}>
-                    <h2 className={`text-2xl text-center font-bold py-2 ${isSidebarOpen ? "" : "hidden"}`}>メニュー</h2>
+            <div className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg`}>
+                <div className={`flex items-center h-16 ${isSidebarOpen ? "justify-between": "justify-center"}`}>
+                    <h2 className={`text-2xl text-center font-bold py-2 truncate ${isSidebarOpen ? "" : "hidden"}`}>メニュー</h2>
                     <button
+                        className="text-gray-500"
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)} // 開閉のトグル
                     >
                         {isSidebarOpen ? <CircleChevronLeft className="w-10 h-10" /> : <CircleChevronRight className="w-10 h-10" />}
@@ -22,22 +23,22 @@ export default function Dashboard() {
                 </div>
                 <ul className="text-xl">
                     <li
-                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                         onClick={() => setSelected("account")}
                     >
-                        <User className="w-10 h-10" />{isSidebarOpen && "アカウント情報"}
+                        <User className="w-10 h-10 shrink-0" />{isSidebarOpen && "アカウント情報"}
                     </li>
                     <li
-                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                         onClick={() => setSelected("map")}
                     >
-                        <Map className="w-10 h-10" />{isSidebarOpen && "農地を選ぶ"}
+                        <Map className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を選ぶ"}
                     </li>
                     <li
-                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                        className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer truncate ${selected === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                         onClick={() => setSelected("analyze")}
                     >
-                        <ChartLine className="w-10 h-10" />{isSidebarOpen && "農地を分析する"}
+                        <ChartLine className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を分析する"}
                     </li>
                 </ul>
             </div>
