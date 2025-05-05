@@ -6,7 +6,7 @@ import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut } f
 import dynamic from "next/dynamic";
 
 const MapViewer = dynamic(() => import("../components/MapViewer"), {
-    ssr: false, // ←ここがポイント
+    ssr: false, // ここがポイント
 });
 
 export default function Mypage() {
@@ -65,9 +65,9 @@ export default function Mypage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex">
+        <div className="flex min-h-screen">
             {/* Sidebar */}
-            <div className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg flex flex-col justify-between select-none truncate`}>
+            <aside className={`${isSidebarOpen ? "w-64" : "w-25"} transition-all duration-300 px-4 pt-4 shadow-lg flex flex-col justify-between select-none truncate`}>
                 {/* メニュー上部 */}
                 <div>
                     <div className={`flex items-center h-16 ${isSidebarOpen ? "justify-between" : "justify-center"}`}>
@@ -110,10 +110,10 @@ export default function Mypage() {
                         <LogOut className="w-10 h-10 shrink-0" />{isSidebarOpen && "ログアウト"}
                     </li>
                 </ul>
-            </div>
+            </aside>
 
             {/* Main area */}
-            <div className="main flex-1 p-6">
+            <main className="flex-1 p-6">
                 <div className="select-none">
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
@@ -150,7 +150,7 @@ export default function Mypage() {
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を選ぶ</h1>
                             <p>地図を使って農地（関心領域）を選びます。</p>
-                            <MapViewer />;
+                            <MapViewer />
                         </div>
                     )}
                     {selected === "analyze" && (
@@ -160,7 +160,7 @@ export default function Mypage() {
                         </div>
                     )}
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
