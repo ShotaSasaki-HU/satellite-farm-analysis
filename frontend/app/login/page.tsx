@@ -53,6 +53,9 @@ export default function LoginPage() {
                             placeholder=""
                         />
                     </div>
+                    <p className={`${error === "" ? "hidden" : "text-red-500 font-bold text-center"}`}>
+                        メールアドレスかパスワードが間違っています。
+                    </p>
                     <button
                         type="submit"
                         className="w-full bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-md transition text-xl"
