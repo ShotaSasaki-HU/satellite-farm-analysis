@@ -19,7 +19,7 @@ export default function LoginPage() {
             style={{ backgroundImage: 'url(/login-bg.jpg)' }} // public/login-bg.jpg に画像を置いてね
         >
             <div className="bg-white bg-opacity-80 rounded-2xl shadow-xl p-8 w-full max-w-md mx-4">
-                <h1 className="text-2xl font-bold mb-6 text-center text-green-600 text-4xl">Agri-Eye</h1>
+                <h1 className="text-2xl font-bold mb-6 text-center text-green-800 text-4xl italic">Agri-Eye</h1>
                 <form className="space-y-4">
                     <div>
                         <label className="block text-gray-700">メールアドレス</label>
