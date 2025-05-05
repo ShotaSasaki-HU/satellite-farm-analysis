@@ -3,6 +3,11 @@
 
 import { useState, useEffect } from "react";
 import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const MapViewer = dynamic(() => import("../components/MapViewer"), {
+    ssr: false, // ←ここがポイント
+});
 
 export default function Mypage() {
     const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
@@ -145,6 +150,7 @@ export default function Mypage() {
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を選ぶ</h1>
                             <p>地図を使って農地（関心領域）を選びます。</p>
+                            <MapViewer />;
                         </div>
                     )}
                     {selected === "analyze" && (
