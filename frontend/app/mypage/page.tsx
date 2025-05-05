@@ -115,9 +115,30 @@ export default function Mypage() {
                         <p className="text-xl">{userName} 様</p>
                     </div>
                     {selected === "account" && (
-                        <div className="text-center">
-                            <h1 className="text-3xl font-bold text-green-800">アカウント情報</h1>
-                            <p>ご自身のアカウント情報を確認できます。</p>
+                        <div>
+                            <div className="text-center mb-6">
+                                <h1 className="text-3xl font-bold text-green-800">アカウント情報</h1>
+                                <p>ご自身のアカウント情報を確認できます。</p>
+                            </div>
+                            <hr className="border-t border-gray-300" />
+
+                            <ul className="flex items-center w-full h-16">
+                                <li className="w-[25%] font-bold truncate">名前</li>
+                                <li className="flex-1 text-xl truncate">{userName}</li>
+                            </ul>
+                            <hr className="border-t border-gray-300" />
+
+                            <ul className="flex items-center w-full h-16">
+                                <li className="w-[25%] font-bold truncate">メールアドレス</li>
+                                <li className="flex-1 text-xl truncate">{userEmail}</li>
+                            </ul>
+                            <hr className="border-t border-gray-300" />
+
+                            <ul className="flex items-center w-full h-16">
+                                <li className="w-[25%] font-bold truncate">電話番号</li>
+                                <li className="flex-1 text-xl truncate">未登録</li>
+                            </ul>
+                            <hr className="border-t border-gray-300" />
                         </div>
                     )}
                     {selected === "map" && (
