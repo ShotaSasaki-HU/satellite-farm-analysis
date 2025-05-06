@@ -20,9 +20,9 @@ export default function ListItem({
             className={className}
             onClick={onClick}
         >
-            <div className="flex-1 flex flex-col items-start bg-green-600">
-                <span className="text-2xl">{ main }</span>
-                <span className="text-xl">{ sub }</span>
+            <div className="flex-1 flex flex-col items-start">
+                <span className="text-xl">{ main }</span>
+                <span className="text text-gray-800">あ{ sub }</span>
             </div>
             <button className="w-[25%] text-green-600">
                 編集

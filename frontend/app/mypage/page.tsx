@@ -16,7 +16,7 @@ export default function Mypage() {
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
     const [aoiGroups, setAoiGroups] = useState<{ id: string; name: string }[]>([]);
-    const [groups, setGroups] = useState<string[]>(["家庭菜園", "レンコン", "田んぼ"]);
+    const [groups, setGroups] = useState<string[]>(["田んぼ", "山に買った畑", "家庭菜園"]);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -155,7 +155,7 @@ export default function Mypage() {
                             <p>地図を使って農地（関心領域）を選びます。</p>
                             <div className="flex border-1 border-gray-400">
                                 <MapViewer />
-                                <div className="w-64">
+                                <div className="w-80">
                                     <h1 className="text-xl text-center font-bold py-2 truncate">作成したグループ</h1>
                                     <hr className="border-t border-gray-300" />
                                     <ul>
