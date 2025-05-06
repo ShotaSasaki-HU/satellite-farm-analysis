@@ -1,20 +1,33 @@
 from fastapi import APIRouter, Query, Depends
 from sqlalchemy.orm import Session
-from main import db_dependency
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 from models import Fude, User
 from fastapi.responses import JSONResponse
 import json
 from pathlib import Path
 from auth import get_current_user
+from database import SessionLocal
+from typing import Annotated
 
 router = APIRouter()
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
 @router.get("/fudes")
 def get_fudes(
+    db: db_dependency,
     lat: float = Query(...), # クエリ文字列 lat=... で緯度を受け取る（必須）
     lon: float = Query(...), # クエリ文字列 lon=... で経度を受け取る（必須）
     zoom: int = Query(...),  # クエリ文字列 zoom=... でズームレベルを受け取る（必須）
-    db: Session = db_dependency,
     current_user: User = Depends(get_current_user) # 認証用
 ):
     # 簡易的な検索半径設定（zoomに応じて）
@@ -27,6 +40,7 @@ def get_fudes(
         15: 0.008,
         14: 0.02,   # ~2km
     }.get(zoom, 0.01)  # デフォルト0.01
+    radius_deg = 0.002
 
     # SQLレベルで緯度経度の範囲でフィルタ（本来は空間インデックス等を使う）
     fudes = db.query(Fude).filter(
@@ -59,7 +73,7 @@ def get_fudes(
             "properties": target_feature["properties"]
         }
 
-        result_features.append()
+        result_features.append(target_feature_nocrs)
 
     return JSONResponse(content={
         "type": "FeatureCollection",

@@ -52,10 +52,11 @@ function MapEventHandler() {
       const zoom = map.getZoom();
 
       const now = Date.now();
-      if (now - lastSentTime < 1000) return; // 1秒間隔に制限
+      if (now - lastSentTime < 10000) return; // 1秒間隔に制限
 
       setLastSentTime(now);
 
+      console.log(`リクエストします：http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`);
       // APIに送信（GETでもPOSTでもいい）
       fetch(
         `http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`,
