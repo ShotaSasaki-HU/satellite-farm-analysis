@@ -11,8 +11,8 @@ const MapViewer = dynamic(() => import("../components/MapViewer"), {
 });
 
 export default function Mypage() {
-    const [selected, setSelected] = useState<string>("map"); // サイドバーの選択状態
-    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // サイドバーの開閉状態
+    const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
     const [aoiGroups, setAoiGroups] = useState<{ id: string; name: string }[]>([]);
