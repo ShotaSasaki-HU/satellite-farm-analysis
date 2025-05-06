@@ -1,30 +1,43 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from database import Base # database.py
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
-# User という名前のテーブル定義を開始。Base を継承しているから「このクラスはテーブルです」とSQLAlchemyが認識。
+# 中間テーブル（多対多：GroupedAoi と Fude）
+grouped_aoi_fudes = Table(
+    "grouped_aoi_fudes",
+    Base.metadata,
+    Column("grouped_aoi_id", ForeignKey("grouped_aois.id"), primary_key=True),
+    Column("fude_id", ForeignKey("fudes.uuid"), primary_key=True)
+)
+
 class User(Base):
     __tablename__ = "users"
 
-    # よく検索に使うならばindex=True
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    name = Column(String, nullable=False)
-
-    # 双方向リンク（あると便利）
-    # 「このUserクラスのaoisはAOIクラスとつながってるよ。AOI側ではuser属性で戻ってこれるよ。」
-    aois = relationship("AOI", back_populates="user")
-
-class AOI(Base):
-    __tablename__ = "aois"
-
-    id = Column(Integer, primary_key=True)
     name = Column(String)
-    coordinates_json = Column(String)  # JSON文字列で保存（リストはDBに直接入らないので）
-    user_id = Column(Integer, ForeignKey("users.id")) # 外部キー制約あり（この列に格納できるのは指定した外部の列だけ）
 
-    # 双方向リンク（あると便利）
-    # 「このAOIクラスのuserはUserクラスとつながってるよ。User側ではaois属性で戻ってこれるようにしてるよ。」
-    user = relationship("User", back_populates="aois")
+    grouped_aois = relationship("GroupedAoi", back_populates="user")
+
+class Fude(Base):
+    __tablename__ = "fudes"
+
+    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4) # 汎用一意識別子UUID：世界に一つだけのID
+    path_from_root = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
+    centroid_lat = Column(String, nullable=True) # centroid緯度（検索用）
+    centroid_lon = Column(String, nullable=True) # centroid経度（検索用）
+
+    grouped_aois = relationship("GroupedAoi", secondary=grouped_aoi_fudes, back_populates="fudes")
+
+class GroupedAoi(Base):
+    __tablename__ = "grouped_aois"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="grouped_aois")
+    fudes = relationship("Fude", secondary=grouped_aoi_fudes, back_populates="grouped_aois")
