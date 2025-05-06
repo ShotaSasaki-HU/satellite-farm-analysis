@@ -6,7 +6,7 @@ from models import Fude
 from database import SessionLocal, engine, Base, DATABASE_URL # database.py
 import json
 from sqlalchemy.orm import Session
-import uuid
+# import uuid
 
 Base.metadata.create_all(bind=engine) # データベースに未作成のテーブルを作成
 
@@ -37,12 +37,12 @@ def load_fudes_from_dir(base_path: Path):
                 uuid=str(polygon_uuid),
                 path=str(json_file),
                 features_index=idx,
-                centroid_lat=str(centroid_lat), # floatがいいよ。
-                centroid_lon=str(centroid_lon),
+                centroid_lat=float(centroid_lat),
+                centroid_lon=float(centroid_lon),
             )
             session.add(fude)
             count += 1
-            if count % 1000 == 0:
+            if count % 10000 == 0:
                 session.commit()
                 print(f"{count} fudes committed...")
 
