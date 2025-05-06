@@ -27,8 +27,8 @@ class Fude(Base):
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4) # 汎用一意識別子UUID：世界に一つだけのID
     path_from_root = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
-    centroid_lat = Column(String, nullable=True) # centroid緯度（検索用）
-    centroid_lon = Column(String, nullable=True) # centroid経度（検索用）
+    centroid_lat = Column(String, nullable=True) # 重心緯度（検索用）
+    centroid_lon = Column(String, nullable=True) # 重心経度（検索用）
 
     grouped_aois = relationship("GroupedAoi", secondary=grouped_aoi_fudes, back_populates="fudes")
 
