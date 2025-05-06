@@ -160,7 +160,7 @@ export default function Mypage() {
                                     <hr className="border-t border-gray-300" />
                                     <ul>
                                         {groups.map((group, index) => (
-                                            <ListItem name={group} />
+                                            <ListItem key={index} main={group} />
                                         ))}
 
                                         {/* グループ作成ボタン */}
