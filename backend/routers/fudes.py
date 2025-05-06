@@ -53,7 +53,6 @@ def get_fudes(
         Fude.centroid_lat.between(lat - radius_deg, lat + radius_deg),
         Fude.centroid_lon.between(lon - radius_deg, lon + radius_deg)
     ).all()
-    print(len(fudes))
 
     # geojsonファイルを読み込み、中心からの距離でフィルタ
     result_features = []
