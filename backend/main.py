@@ -4,8 +4,8 @@ from fastapi import FastAPI, HTTPException, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
-from database import SessionLocal, engine # database.py
-from models import Base, User # models.py
+from database import SessionLocal, engine, Base # database.py
+from models import User # models.py
 from sqlalchemy.orm import Session
 from typing import Annotated
 from password_utils import verify_password, hash_password
@@ -14,7 +14,7 @@ from auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_u
 
 app = FastAPI()
 
-# データベースにテーブルを作成
+# データベースに未作成のテーブルを作成
 Base.metadata.create_all(bind=engine)
 
 # 仮想ユーザーの登録

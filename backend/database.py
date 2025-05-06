@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # SQLAlchemyがDBと接続するための窓口であるengineを作る。
-# aoi.dbがなければ自動作成
+# .dbがなければ自動作成
 DATABASE_URL = "sqlite:///./agri_eye.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 # connect_argsは、SQLite用の引数らしい。詳細はのちのち。

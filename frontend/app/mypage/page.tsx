@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut } from "lucide-react";
+import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const MapViewer = dynamic(() => import("../components/MapViewer"), {
@@ -10,10 +10,11 @@ const MapViewer = dynamic(() => import("../components/MapViewer"), {
 });
 
 export default function Mypage() {
-    const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
-    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
+    const [selected, setSelected] = useState<string>("map"); // サイドバーの選択状態
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // サイドバーの開閉状態
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
+    const [aoiGroups, setAoiGroups] = useState<{ id: string; name: string }[]>([]);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -150,7 +151,19 @@ export default function Mypage() {
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を選ぶ</h1>
                             <p>地図を使って農地（関心領域）を選びます。</p>
-                            <MapViewer />
+                            <div className="flex border-1 border-gray-400">
+                                <MapViewer />
+                                <div className="w-64">
+                                    <h1 className="text-xl text-center font-bold py-2 truncate">作成したグループ</h1>
+                                    <hr className="border-t border-gray-300" />
+                                    <ul>
+                                        {/* グループ作成ボタン */}
+                                        <li className="flex justify-center items-center cursor-pointer hover:text-green-400" onClick={() => {}}>
+                                            <FolderPlus className="w-8 h-8"/>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     )}
                     {selected === "analyze" && (

@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from database import Base # database.py
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
 
 # 中間テーブル（多対多：GroupedAoi と Fude）
 grouped_aoi_fudes = Table(
@@ -26,7 +25,8 @@ class Fude(Base):
     __tablename__ = "fudes"
 
     # uuid使わないけど一意性のためにあったほうがいいのか？
-    uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4) # 汎用一意識別子UUID：世界に一つだけのID
+    # uuid = Column(UUID(as_uuid=True), primary_key=True) # 汎用一意識別子UUID：世界に一つだけのID
+    uuid = Column(String, primary_key=True)
     path = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
     features_index = Column(Integer, nullable=False) # JSONファイルのfeaturesの中で何番目（アクセス用）
     centroid_lat = Column(String, nullable=False) # 重心緯度（検索用）
