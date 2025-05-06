@@ -26,7 +26,7 @@ class Fude(Base):
     __tablename__ = "fudes"
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4) # 汎用一意識別子UUID：世界に一つだけのID
-    path_from_root = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
+    path = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
     centroid_lat = Column(String, nullable=True) # 重心緯度（検索用）
     centroid_lon = Column(String, nullable=True) # 重心経度（検索用）
 
