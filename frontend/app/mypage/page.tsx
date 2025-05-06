@@ -113,7 +113,7 @@ export default function Mypage() {
             </aside>
 
             {/* Main area */}
-            <main className={`flex-1 py-6 pr-6 ${isSidebarOpen ? "pl-70" : "pl-31"}`}> {/* pl = asideの幅w + 6 */}
+            <main className={`flex-1 py-6 pr-6 ${isSidebarOpen ? "pl-70" : "pl-31"} transition-all duration-300`}> {/* pl = asideの幅w + 6 */}
                 <div className="select-none">
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
