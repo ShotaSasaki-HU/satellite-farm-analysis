@@ -4,9 +4,10 @@
 import { useState, useEffect } from "react";
 import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus } from "lucide-react";
 import dynamic from "next/dynamic";
+import ListItem from "../components/ListItem";
 
 const MapViewer = dynamic(() => import("../components/MapViewer"), {
-    ssr: false, // ここがポイント
+    ssr: false,
 });
 
 export default function Mypage() {
@@ -15,6 +16,7 @@ export default function Mypage() {
     const [userName, setUserName] = useState<string>("");
     const [userEmail, setUserEmail] = useState<string>("");
     const [aoiGroups, setAoiGroups] = useState<{ id: string; name: string }[]>([]);
+    const [groups, setGroups] = useState<string[]>(["家庭菜園", "レンコン", "田んぼ"]);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -157,6 +159,10 @@ export default function Mypage() {
                                     <h1 className="text-xl text-center font-bold py-2 truncate">作成したグループ</h1>
                                     <hr className="border-t border-gray-300" />
                                     <ul>
+                                        {groups.map((group, index) => (
+                                            <ListItem name={group} />
+                                        ))}
+
                                         {/* グループ作成ボタン */}
                                         <li className="flex justify-center items-center cursor-pointer hover:text-green-400" onClick={() => {}}>
                                             <FolderPlus className="w-8 h-8"/>
