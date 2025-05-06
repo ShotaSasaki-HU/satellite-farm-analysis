@@ -31,6 +31,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 ### トークン付きのアクセス制限（認証ガード）ココカラ ###
 
+# mainからimportすると、circular importエラーを起こす。
 def get_db():
     db = SessionLocal()
     try:

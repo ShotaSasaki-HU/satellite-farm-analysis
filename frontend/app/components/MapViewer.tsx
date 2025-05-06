@@ -24,7 +24,18 @@ const geoJsonData: FeatureCollection = {
           ]
         ],
       },
-      properties: {},
+      "properties": {
+        "polygon_uuid": "1dba1043-38bb-40da-9e88-eb1ef9beaff4",
+        "land_type": 200,
+        "issue_year": 2024,
+        "edit_year": 2020,
+        "history": "[{\"筆ポリゴンID\":\"29996564-6256-402b-b48b-5daafda706f5\",\"更新年度\":2023,\"前年同一\":true},[{\"筆ポリゴンID\":\"2b0ef02c-56b4-4c58-851f-b93109a2a288\",\"更新年度\":2022,\"前年同一\":true},[{\"筆ポリゴンID\":\"1260ed49-3d13-479d-8a60-c96b35837a34\",\"更新年度\":2021,\"前年同一\":true},{\"筆ポリゴンID\":\"1260ed49-3d13-479d-8a60-c96b35837a34\",\"発生年度\":2020}]]]",
+        "last_polygon_uuid": "29996564-6256-402b-b48b-5daafda706f5",
+        "prev_last_polygon_uuid": "2b0ef02c-56b4-4c58-851f-b93109a2a288",
+        "local_government_cd": "011011",
+        "point_lng": 141.259948641,
+        "point_lat": 43.043042925
+      },
     },
   ],
 };
@@ -58,7 +69,7 @@ function MapEventHandler() {
           console.log("受け取ったデータ:", data);
           // TODO: 地図に描画するステートに格納
         }
-      );
+        );
     },
   });
 
