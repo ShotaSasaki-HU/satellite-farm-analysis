@@ -25,10 +25,12 @@ class User(Base):
 class Fude(Base):
     __tablename__ = "fudes"
 
+    # uuid使わないけど一意性のためにあったほうがいいのか？
     uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4) # 汎用一意識別子UUID：世界に一つだけのID
     path = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
-    centroid_lat = Column(String, nullable=True) # 重心緯度（検索用）
-    centroid_lon = Column(String, nullable=True) # 重心経度（検索用）
+    features_index = Column(Integer, nullable=False) # JSONファイルのfeaturesの中で何番目（アクセス用）
+    centroid_lat = Column(String, nullable=False) # 重心緯度（検索用）
+    centroid_lon = Column(String, nullable=False) # 重心経度（検索用）
 
     grouped_aois = relationship("GroupedAoi", secondary=grouped_aoi_fudes, back_populates="fudes")
 

@@ -24,7 +24,7 @@ const geoJsonData: FeatureCollection = {
           ]
         ],
       },
-      "properties": {
+      properties: {
         "polygon_uuid": "1dba1043-38bb-40da-9e88-eb1ef9beaff4",
         "land_type": 200,
         "issue_year": 2024,
