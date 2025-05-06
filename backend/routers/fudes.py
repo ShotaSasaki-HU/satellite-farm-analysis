@@ -10,6 +10,7 @@ from pathlib import Path
 from auth import get_current_user
 from database import SessionLocal
 from typing import Annotated
+from functools import lru_cache
 
 router = APIRouter()
 
@@ -21,6 +22,12 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+
+# 同じ引数が与えられた時キャッシュが使える。
+@lru_cache(maxsize=128)
+def load_geojson(path: Path):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 @router.get("/fudes")
 def get_fudes(
@@ -40,13 +47,13 @@ def get_fudes(
         15: 0.008,
         14: 0.02,   # ~2km
     }.get(zoom, 0.01)  # デフォルト0.01
-    radius_deg = 0.002
 
     # SQLレベルで緯度経度の範囲でフィルタ（本来は空間インデックス等を使う）
     fudes = db.query(Fude).filter(
         Fude.centroid_lat.between(lat - radius_deg, lat + radius_deg),
         Fude.centroid_lon.between(lon - radius_deg, lon + radius_deg)
     ).all()
+    print(len(fudes))
 
     # geojsonファイルを読み込み、中心からの距離でフィルタ
     result_features = []
@@ -57,8 +64,7 @@ def get_fudes(
         if not geojson_path.exists():
             print(f"{geojson_path}が見つかりませんでした。")
             continue
-        with open(geojson_path, "r", encoding="utf-8") as f:
-            geojson = json.load(f)
+        geojson = load_geojson(geojson_path)
             
         # 今見ている筆ポリゴンを抽出
         target_feature = geojson["features"][fude.features_index]

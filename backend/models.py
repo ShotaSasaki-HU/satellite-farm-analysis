@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index
 from sqlalchemy.orm import relationship
 from database import Base # database.py
-from sqlalchemy.dialects.postgresql import UUID
+# from sqlalchemy.dialects.postgresql import UUID
 
 # 中間テーブル（多対多：GroupedAoi と Fude）
 grouped_aoi_fudes = Table(
@@ -29,10 +29,16 @@ class Fude(Base):
     uuid = Column(String, primary_key=True)
     path = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
     features_index = Column(Integer, nullable=False) # JSONファイルのfeaturesの中で何番目（アクセス用）
-    centroid_lat = Column(String, nullable=False) # 重心緯度（検索用）
-    centroid_lon = Column(String, nullable=False) # 重心経度（検索用）
+    centroid_lat = Column(Float, nullable=False) # 重心緯度（検索用）
+    centroid_lon = Column(Float, nullable=False) # 重心経度（検索用）
 
     grouped_aois = relationship("GroupedAoi", secondary=grouped_aoi_fudes, back_populates="fudes")
+
+    __table_args__ = (
+        Index("idx_lat", "centroid_lat"),
+        Index("idx_lon", "centroid_lon"),
+        Index("idx_lat_lon", "centroid_lat", "centroid_lon"),
+    )
 
 class GroupedAoi(Base):
     __tablename__ = "grouped_aois"

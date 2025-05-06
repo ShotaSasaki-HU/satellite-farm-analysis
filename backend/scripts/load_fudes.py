@@ -37,7 +37,7 @@ def load_fudes_from_dir(base_path: Path):
                 uuid=str(polygon_uuid),
                 path=str(json_file),
                 features_index=idx,
-                centroid_lat=str(centroid_lat),
+                centroid_lat=str(centroid_lat), # floatがいいよ。
                 centroid_lon=str(centroid_lon),
             )
             session.add(fude)
