@@ -4,7 +4,6 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, GeoJSON, useMapEvents } from "react-leaflet";
 import { FeatureCollection } from "geojson";
 import { useState } from "react";
-import { features } from "process";
 
 // 視点近傍の筆ポリゴンを取得（地図イベント監視 + API送信）
 function MapEventHandler({ setFeatures }: { setFeatures: (f: FeatureCollection) => void }) {
@@ -12,18 +11,17 @@ function MapEventHandler({ setFeatures }: { setFeatures: (f: FeatureCollection) 
 
   // useMapEventsは、地図の状態を監視するためのReact Leafletのフック。
   useMapEvents({
-    moveend(e) {
+    moveend(e) { // パン・ズーム操作が終わった時だけ発火
       const map = e.target;
       const center = map.getCenter();
       const zoom = map.getZoom();
 
       const now = Date.now();
-      if (now - lastSentTime < 5000) return; // N秒間隔に制限
+      if (now - lastSentTime < 1000) return; // N秒間隔に制限
 
       setLastSentTime(now);
 
       console.log(`リクエスト中：http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`);
-      // APIに送信（GETでもPOSTでもいい）
       fetch(
         `http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`,
         {
@@ -35,6 +33,7 @@ function MapEventHandler({ setFeatures }: { setFeatures: (f: FeatureCollection) 
         .then((data) => {
           console.log("受け取ったデータ:", data);
           setFeatures(data as FeatureCollection);
+          console.log("ズーム", zoom);
         });
     },
   });
@@ -57,19 +56,16 @@ export default function Map() {
       />
 
       {features && (
-        <>
-          {console.log("描画対象 features:", features)}
-          <GeoJSON
-            key={JSON.stringify(features)}
-            data={features}
-            style={() => ({
-              color: "red",
-              weight: 2,
-              fillColor: "red",
-              fillOpacity: 0.4,
-            })}
-          />
-        </>
+        <GeoJSON
+          key={JSON.stringify(features)} // 再描画のトリガー
+          data={features}
+          style={() => ({
+            color: "red",
+            weight: 2,
+            fillColor: "red",
+            fillOpacity: 0.4,
+          })}
+        />
       )}
 
       <MapEventHandler setFeatures={setFeatures} />
