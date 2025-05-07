@@ -47,8 +47,17 @@ def get_fudes(
         17: 0.007, # ~200m
         16: 0.015,
         15: 0.025,
-        14: 0.025  # 重いよ〜。
+        14: 0.025, # 重いよ〜。
+        13: 0.025,
+        12: 0.025
     }.get(zoom, 0) # デフォルト値
+
+    # ズーム率が低い時はDBのクエリ処理をさせない。
+    if radius_deg == 0:
+        return JSONResponse(content={
+            "type": "FeatureCollection",
+            "features": []
+        })
 
     # SQLレベルで緯度経度の範囲でフィルタ（本来は空間インデックス等を使う）
     fudes = db.query(Fude).filter(
