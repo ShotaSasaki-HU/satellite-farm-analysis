@@ -6,6 +6,7 @@ import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, Fo
 import dynamic from "next/dynamic";
 import ListItem from "../components/ListItem";
 import { FeatureCollection } from "geojson";
+import { useFormState } from "react-dom";
 
 const MapViewer = dynamic(() => import("../components/MapViewer"), {
     ssr: false,
@@ -14,8 +15,9 @@ const MapViewer = dynamic(() => import("../components/MapViewer"), {
 export default function Mypage() {
     const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
-    const [userName, setUserName] = useState<string>("");
+    const [userId, setUserId] = useState<number>();
     const [userEmail, setUserEmail] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");
     const [groupedAois, setGroupedAois] = useState< // 作成したグループ（筆ポリゴンを内包）
         {
             id: number;

@@ -11,7 +11,7 @@ from typing import Annotated
 from password_utils import verify_password, hash_password
 from datetime import timedelta
 from auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
-from routers import fudes, aoi_groups
+from routers import fudes, grouped_aois
 
 app = FastAPI()
 app.include_router(fudes.router)
@@ -96,7 +96,7 @@ def login(data: LoginRequest, response: Response, db: db_dependency):
 
 @app.get("/profile")
 def read_profile(current_user: User = Depends(get_current_user)):
-    return {"name": current_user.name, "email": current_user.email}
+    return {"id": current_user.id, "email": current_user.email, "name": current_user.name}
 
 @app.post("/logout")
 def logout(response: Response):
