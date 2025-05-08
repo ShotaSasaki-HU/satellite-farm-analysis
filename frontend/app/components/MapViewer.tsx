@@ -31,9 +31,7 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
       )
         .then((res) => res.json())
         .then((data) => {
-          console.log("受け取ったデータ:", data);
           setFeatureCollection(data as FeatureCollection);
-          console.log("ズーム", zoom);
         });
     },
   });
