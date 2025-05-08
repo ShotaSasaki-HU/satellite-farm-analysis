@@ -94,6 +94,10 @@ export default function Mypage() {
 
             const data = await res.json();
             setGroupedAois(data);
+            // GAを取得した時は、選択状態が必ず先頭になる。新規作成の時は、fetchGetGroupedAoiの後で選択をセットし直すべし。
+            if (data.length > 0) {
+                setSelectedGA(data[0].id)
+            }
         } catch (error) {
             console.error("通信エラー:", error);
         }
@@ -196,7 +200,8 @@ export default function Mypage() {
                                                 key={index}
                                                 main={group.name}
                                                 sub={group.id.toString()}
-                                                className="flex justify-between items-center py-2 px-4 cursor-pointer border-2 hover:border-green-300 rounded-xl"
+                                                className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                                                onClick={() => setSelectedGA(group.id)}
                                             />
                                         ))}
 
@@ -212,7 +217,9 @@ export default function Mypage() {
                                                     },
                                                     body: JSON.stringify({ name: "新しいグループ" }),
                                                 });
-                                                fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                                await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                                const new_grouop = await res.json();
+                                                setSelectedGA(new_grouop.id);
                                             }}
                                         >
                                             <FolderPlus className="w-8 h-8" />
