@@ -21,8 +21,8 @@ export default function ListItem({
             onClick={onClick}
         >
             <div className="flex-1 flex flex-col items-start">
-                <span className="text-xl">{ main }</span>
-                <span className="text text-gray-800">あ{ sub }</span>
+                <span className="text-lg">{ main }</span>
+                <span className="text-base">あ{ sub }</span>
             </div>
             <button className="w-[25%] text-green-600">
                 編集

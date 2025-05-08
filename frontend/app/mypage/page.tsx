@@ -6,7 +6,6 @@ import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, Fo
 import dynamic from "next/dynamic";
 import ListItem from "../components/ListItem";
 import { FeatureCollection } from "geojson";
-import { useFormState } from "react-dom";
 
 const MapViewer = dynamic(() => import("../components/MapViewer"), {
     ssr: false,
@@ -41,8 +40,9 @@ export default function Mypage() {
                 }
 
                 const data = await res.json();
-                setUserName(data.name); // バックエンドから返ってくるキーに合わせる
+                setUserId(data.id);
                 setUserEmail(data.email);
+                setUserName(data.name);
             } catch (error) {
                 console.error("通信エラー:", error);
             }
@@ -163,18 +163,35 @@ export default function Mypage() {
                             <p>地図を使って農地（関心領域）を選びます。</p>
                             <div className="flex border-1 border-gray-400">
                                 <MapViewer />
-                                <div className="w-80">
+                                <div className="w-80 h-screen flex flex-col">
                                     <h1 className="text-xl text-center font-bold py-2 truncate">作成したグループ</h1>
                                     <hr className="border-t border-gray-300" />
-                                    <ul>
-                                        {/*
-                                        {groups.map((group, index) => (
-                                            <ListItem key={index} main={group} />
+                                    <ul className="flex-1 overflow-y-auto">
+                                        {groupedAois.map((group, index) => (
+                                            <ListItem key={index} main={group.name} />
                                         ))}
-                                        */}
 
                                         {/* グループ作成ボタン */}
-                                        <li className="flex justify-center items-center cursor-pointer hover:text-green-400" onClick={() => { }}>
+                                        <li
+                                        className="flex justify-center items-center cursor-pointer hover:text-green-400 my-3"
+                                        onClick={() => {
+                                            const newGroup: {
+                                                id: number,
+                                                name: string,
+                                                features: FeatureCollection
+                                            } = {
+                                              id: -1, // 一時的なユニークID（本来はサーバーから取得するべき）
+                                              name: "新しいグループ",
+                                              features: {
+                                                type: "FeatureCollection",
+                                                features: [],
+                                              },
+                                            };
+                                          
+                                            // prevには、直前のgroupedAoisの状態（＝現在の状態）が入っている。
+                                            setGroupedAois(prev => [...prev, newGroup]);
+                                          }}
+                                        >
                                             <FolderPlus className="w-8 h-8" />
                                         </li>
                                     </ul>
