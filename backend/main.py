@@ -25,7 +25,12 @@ db = SessionLocal()
 fake_user = {
     "email": "test@example.com",
     "password": hash_password(password="p@ssword"),
-    "name": "開発ユーザー"
+    "name": "開発ユーザー1"
+}
+fake_user = {
+    "email": "test2@example.com",
+    "password": hash_password(password="p@ssword"),
+    "name": "開発ユーザー2"
 }
 # ユーザーが既に存在しない場合のみ追加
 user_exists = db.query(User).filter(User.email == fake_user["email"]).first()
