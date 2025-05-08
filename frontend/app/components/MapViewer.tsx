@@ -21,7 +21,6 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
 
       setLastSentTime(now);
 
-      console.log(`リクエスト中：http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`);
       fetch(
         `http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`,
         {
