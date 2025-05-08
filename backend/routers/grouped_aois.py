@@ -3,12 +3,13 @@ from sqlalchemy.orm import Session
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from models import GroupedAoi
+from models import GroupedAoi, User
 from database import SessionLocal
 from typing import Annotated
 from auth import get_current_user
 import json
 from functools import lru_cache
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -26,10 +27,10 @@ def load_geojson(path: Path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-@router.get("/grouped_aois")
-def get_grouped_aois(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)  # ユーザーidを取得
+@router.get("/grouped-aoi")
+def get_grouped_aoi(
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)  # ユーザーidを取得
 ):
     grouped_aois = db.query(GroupedAoi).filter_by(user_id=current_user.id).all()
     
@@ -61,3 +62,19 @@ def get_grouped_aois(
         })
 
     return result
+
+#######################################################
+
+class GroupedAoiCreate(BaseModel):
+    name: str
+
+@router.post("/create-grouped-aoi")
+def create_grouped_aoi(
+    data: GroupedAoiCreate,
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)
+):
+    new_group = GroupedAoi(name=data.name, user_id=current_user.id)
+    db.add(new_group)
+    db.commit()
+    db.refresh(new_group) # 自動採番されたidがここで入る。サーバー側でidを振って、idの重複を防止。

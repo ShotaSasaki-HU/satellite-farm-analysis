@@ -22,7 +22,7 @@ export default function ListItem({
         >
             <div className="flex-1 flex flex-col items-start">
                 <span className="text-lg">{ main }</span>
-                <span className="text-base">あ{ sub }</span>
+                <span className="text-base">id: { sub }</span>
             </div>
             <button className="w-[25%] text-green-600">
                 編集

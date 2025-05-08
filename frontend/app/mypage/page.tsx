@@ -12,7 +12,7 @@ const MapViewer = dynamic(() => import("../components/MapViewer"), {
 });
 
 export default function Mypage() {
-    const [selected, setSelected] = useState<string>("account"); // サイドバーの選択状態
+    const [selectedSidebar, setSelectedSidebar] = useState<string>("account"); // サイドバーの選択状態
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
     const [userId, setUserId] = useState<number>();
     const [userEmail, setUserEmail] = useState<string>("");
@@ -24,7 +24,9 @@ export default function Mypage() {
             features: FeatureCollection;
         }[]
     >([]);
+    const [selectedGA, setSelectedGA] = useState<number>();
 
+    // 初期化の処理
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -49,8 +51,10 @@ export default function Mypage() {
         };
 
         fetchProfile(); // useEffectは非同期にできないので中で非同期として定義して呼び出す。
+        fetchGetGroupedAoi();
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
 
+    // ログアウト
     const handleLogout = async () => {
         try {
             const res = await fetch("http://localhost:8000/logout", {
@@ -75,6 +79,26 @@ export default function Mypage() {
         }
     };
 
+    // 作成したグループを取得
+    const fetchGetGroupedAoi = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/grouped-aoi", {
+                method: "GET",
+                credentials: "include", // これが HttpOnly Cookie の場合に必須
+            });
+
+            if (!res.ok) {
+                console.error("grouped-aoiの取得に失敗しました。");
+                return;
+            }
+
+            const data = await res.json();
+            setGroupedAois(data);
+        } catch (error) {
+            console.error("通信エラー:", error);
+        }
+    };
+
     return (
         <div className="flex h-screen">
             {/* Sidebar */}
@@ -92,20 +116,20 @@ export default function Mypage() {
                     </div>
                     <ul className="text-xl">
                         <li
-                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                            onClick={() => setSelected("account")}
+                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selectedSidebar === "account" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                            onClick={() => setSelectedSidebar("account")}
                         >
                             <User className="w-10 h-10 shrink-0" />{isSidebarOpen && "アカウント情報"}
                         </li>
                         <li
-                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                            onClick={() => setSelected("map")}
+                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selectedSidebar === "map" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                            onClick={() => setSelectedSidebar("map")}
                         >
                             <Map className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を選ぶ"}
                         </li>
                         <li
-                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selected === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                            onClick={() => setSelected("analyze")}
+                            className={`flex items-center gap-2 p-3 my-1 border-2 hover:border-green-300 rounded-xl cursor-pointer ${selectedSidebar === "analyze" ? "bg-green-100 border-green-300" : "border-gray-300"}`}
+                            onClick={() => setSelectedSidebar("analyze")}
                         >
                             <ChartLine className="w-10 h-10 shrink-0" />{isSidebarOpen && "農地を分析する"}
                         </li>
@@ -130,7 +154,7 @@ export default function Mypage() {
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
                         <p className="text-xl">{userName} 様</p>
                     </div>
-                    {selected === "account" && (
+                    {selectedSidebar === "account" && (
                         <div>
                             <div className="text-center mb-6">
                                 <h1 className="text-3xl font-bold text-green-800">アカウント情報</h1>
@@ -157,7 +181,7 @@ export default function Mypage() {
                             <hr className="border-t border-gray-300" />
                         </div>
                     )}
-                    {selected === "map" && (
+                    {selectedSidebar === "map" && (
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を選ぶ</h1>
                             <p>地図を使って農地（関心領域）を選びます。</p>
@@ -166,31 +190,30 @@ export default function Mypage() {
                                 <div className="w-80 h-screen flex flex-col">
                                     <h1 className="text-xl text-center font-bold py-2 truncate">作成したグループ</h1>
                                     <hr className="border-t border-gray-300" />
-                                    <ul className="flex-1 overflow-y-auto">
+                                    <ul className="flex-1 overflow-y-auto"> {/* スクロールバーは自動 */}
                                         {groupedAois.map((group, index) => (
-                                            <ListItem key={index} main={group.name} />
+                                            <ListItem
+                                                key={index}
+                                                main={group.name}
+                                                sub={group.id.toString()}
+                                                className="flex justify-between items-center py-2 px-4 cursor-pointer border-2 hover:border-green-300 rounded-xl"
+                                            />
                                         ))}
 
                                         {/* グループ作成ボタン */}
                                         <li
-                                        className="flex justify-center items-center cursor-pointer hover:text-green-400 my-3"
-                                        onClick={() => {
-                                            const newGroup: {
-                                                id: number,
-                                                name: string,
-                                                features: FeatureCollection
-                                            } = {
-                                              id: -1, // 一時的なユニークID（本来はサーバーから取得するべき）
-                                              name: "新しいグループ",
-                                              features: {
-                                                type: "FeatureCollection",
-                                                features: [],
-                                              },
-                                            };
-                                          
-                                            // prevには、直前のgroupedAoisの状態（＝現在の状態）が入っている。
-                                            setGroupedAois(prev => [...prev, newGroup]);
-                                          }}
+                                            className="flex justify-center items-center cursor-pointer hover:text-green-400 my-3"
+                                            onClick={async () => {
+                                                const res = await fetch("http://localhost:8000/create-grouped-aoi", {
+                                                    method: "POST",
+                                                    credentials: "include",
+                                                    headers: {
+                                                        "Content-Type": "application/json",
+                                                    },
+                                                    body: JSON.stringify({ name: "新しいグループ" }),
+                                                });
+                                                fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                            }}
                                         >
                                             <FolderPlus className="w-8 h-8" />
                                         </li>
@@ -199,7 +222,7 @@ export default function Mypage() {
                             </div>
                         </div>
                     )}
-                    {selected === "analyze" && (
+                    {selectedSidebar === "analyze" && (
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を分析する</h1>
                             <p>選んだ農地（関心領域）の分析を行います。</p>

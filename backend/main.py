@@ -15,6 +15,7 @@ from routers import fudes, grouped_aois
 
 app = FastAPI()
 app.include_router(fudes.router)
+app.include_router(grouped_aois.router)
 
 # データベースに未作成のテーブルを作成
 Base.metadata.create_all(bind=engine)
