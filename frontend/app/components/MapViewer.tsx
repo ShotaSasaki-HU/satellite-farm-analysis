@@ -21,6 +21,7 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
 
       setLastSentTime(now);
 
+      console.log(`筆ポリゴンをリクエスト中：http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`);
       fetch(
         `http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`,
         {
@@ -30,6 +31,7 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
       )
         .then((res) => res.json())
         .then((data) => {
+          console.log("筆ポリゴン受け取り");
           setFeatureCollection(data as FeatureCollection);
         });
     },
