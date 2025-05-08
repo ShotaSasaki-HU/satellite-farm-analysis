@@ -6,7 +6,7 @@ import { FeatureCollection } from "geojson";
 import { useState } from "react";
 
 // 視点近傍の筆ポリゴンを取得（地図イベント監視 + API送信）
-function MapEventHandler({ setFeatures }: { setFeatures: (f: FeatureCollection) => void }) {
+function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: FeatureCollection) => void }) {
   const [lastSentTime, setLastSentTime] = useState(0);
 
   // useMapEventsは、地図の状態を監視するためのReact Leafletのフック。
@@ -32,7 +32,7 @@ function MapEventHandler({ setFeatures }: { setFeatures: (f: FeatureCollection) 
         .then((res) => res.json())
         .then((data) => {
           console.log("受け取ったデータ:", data);
-          setFeatures(data as FeatureCollection);
+          setFeatureCollection(data as FeatureCollection);
           console.log("ズーム", zoom);
         });
     },
@@ -42,7 +42,7 @@ function MapEventHandler({ setFeatures }: { setFeatures: (f: FeatureCollection) 
 }
 
 export default function Map() {
-  const [features, setFeatures] = useState<FeatureCollection | null>(null); // オーバーレイする筆ポリゴン
+  const [featureCollection, setFeatureCollection] = useState<FeatureCollection | null>(null); // オーバーレイする筆ポリゴン
 
   return (
     <MapContainer
@@ -55,20 +55,31 @@ export default function Map() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {features && (
+      {featureCollection && (
         <GeoJSON
-          key={JSON.stringify(features)} // 再描画のトリガー
-          data={features}
-          style={() => ({
-            color: "red",
-            weight: 2,
-            fillColor: "red",
-            fillOpacity: 0.4,
-          })}
+          key={JSON.stringify(featureCollection)}
+          data={featureCollection}
+          style={(feature) => { // featureには、GeoJSONの中の各Featureオブジェクトが1つずつ引数として渡される。
+            const landType = feature?.properties.land_type;
+            let fill_color = "red";
+
+            if (landType === 100) {
+              fill_color = "yellow";
+            } else if (landType === 200) {
+              fill_color = "green";
+            }
+
+            return {
+              color: "gray",
+              weight: 1.5,
+              fillColor: fill_color,
+              fillOpacity: 0.6,
+            };
+          }}
         />
       )}
 
-      <MapEventHandler setFeatures={setFeatures} />
+      <MapEventHandler setFeatureCollection={setFeatureCollection} />
     </MapContainer>
   );
 }
