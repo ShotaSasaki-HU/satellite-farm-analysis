@@ -60,19 +60,22 @@ export default function Map() {
           data={featureCollection}
           style={(feature) => { // featureには、GeoJSONの中の各Featureオブジェクトが1つずつ引数として渡される。
             const landType = feature?.properties.land_type;
-            let fill_color = "red";
+            let fillColor = "red";
+            let borderColor = "darkred";
 
             if (landType === 100) {
-              fill_color = "yellow";
+              fillColor = "yellow";
+              borderColor = "#bfa500"; // 黄土色寄りの落ち着いた色
             } else if (landType === 200) {
-              fill_color = "green";
+              fillColor = "green";
+              borderColor = "darkgreen";
             }
 
             return {
-              color: "gray",
+              color: borderColor,
               weight: 1.5,
-              fillColor: fill_color,
-              fillOpacity: 0.6,
+              fillColor: fillColor,
+              fillOpacity: 0.5,
             };
           }}
         />
