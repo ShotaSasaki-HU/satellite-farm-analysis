@@ -1,3 +1,4 @@
+// MapViewer.tsx
 "use client";
 
 import "leaflet/dist/leaflet.css";
@@ -21,7 +22,7 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
 
       setLastSentTime(now);
 
-      console.log(`筆ポリゴンをリクエスト中：http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`);
+      // console.log(`筆ポリゴンをリクエスト中：http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`);
       fetch(
         `http://localhost:8000/fudes?lat=${center.lat}&lon=${center.lng}&zoom=${zoom}`,
         {
@@ -31,7 +32,7 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
       )
         .then((res) => res.json())
         .then((data) => {
-          console.log("筆ポリゴン受け取り");
+          // console.log("筆ポリゴン受け取り");
           setFeatureCollection(data as FeatureCollection);
         });
     },
@@ -40,7 +41,11 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
   return null;
 }
 
-export default function Map() {
+export default function Map({
+  onFeatureClick,
+}: {
+  onFeatureClick?: (feature: GeoJSON.Feature) => void;
+}) {
   const [featureCollection, setFeatureCollection] = useState<FeatureCollection | null>(null); // オーバーレイする筆ポリゴン
 
   return (
@@ -77,6 +82,13 @@ export default function Map() {
               fillColor: fillColor,
               fillOpacity: 0.5,
             };
+          }}
+          onEachFeature={(feature, layer) => {
+            layer.on("click", () => {
+              if (onFeatureClick) {
+                onFeatureClick(feature);
+              }
+            });
           }}
         />
       )}

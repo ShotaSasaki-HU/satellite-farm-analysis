@@ -26,7 +26,7 @@ class Fude(Base):
 
     # uuid使わないけど一意性のためにあったほうがいいのか？
     # uuid = Column(UUID(as_uuid=True), primary_key=True) # 汎用一意識別子UUID：世界に一つだけのID
-    uuid = Column(String, primary_key=True)
+    uuid = Column(String, primary_key=True, index=True)
     path = Column(String, nullable=False) # 例: data/fude_polygon_2024/2024_01/2024_012345.json
     features_index = Column(Integer, nullable=False) # JSONファイルのfeaturesの中で何番目（アクセス用）
     centroid_lat = Column(Float, nullable=False) # 重心緯度（検索用）

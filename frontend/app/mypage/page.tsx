@@ -21,7 +21,7 @@ export default function Mypage() {
         {
             id: number;
             name: string;
-            features: FeatureCollection;
+            featureCollection: FeatureCollection;
         }[]
     >([]);
     const [selectedGA, setSelectedGA] = useState<number>();
@@ -190,16 +190,38 @@ export default function Mypage() {
                             <h1 className="text-3xl font-bold text-green-800">農地を選ぶ</h1>
                             <p>地図を使って農地（関心領域）を選びます。</p>
                             <div className="flex border-1 border-gray-400">
-                                <MapViewer />
+                                {/* React Leaflet */}
+                                <MapViewer
+                                    onFeatureClick={(feature) => {
+                                        console.log("選択されたポリゴン:", feature.properties);
+
+                                        (async () => {
+                                            const polygonId = feature.properties?.polygon_uuid;
+                                            if (!polygonId) {
+                                                console.warn("polygon_uuid が取得できませんでした");
+                                                return;
+                                            }
+                                            const res = await fetch(`http://localhost:8000/grouped-aoi/${selectedGA}/${polygonId}`, {
+                                                method: "POST",
+                                                credentials: "include"
+                                            });
+                                            const temp = selectedGA;
+                                            await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                            setSelectedGA(temp);
+                                        })();
+                                    }}
+                                />
+
+                                {/* 作成したグループ */}
                                 <div className="w-80 h-screen flex flex-col">
                                     <h1 className="text-xl text-center font-bold py-2 truncate">作成したグループ</h1>
                                     <hr className="border-t border-gray-300" />
                                     <ul className="flex-1 overflow-y-auto"> {/* スクロールバーは自動 */}
                                         {groupedAois.map((group, index) => (
                                             <ListItem
-                                                key={index}
+                                                key={group.id}
                                                 main={group.name}
-                                                sub={group.id.toString()}
+                                                sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                                                 onClick={() => setSelectedGA(group.id)}
                                             />
