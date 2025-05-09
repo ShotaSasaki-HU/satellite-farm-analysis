@@ -51,7 +51,7 @@ export default function Mypage() {
         };
 
         fetchProfile(); // useEffectは非同期にできないので中で非同期として定義して呼び出す。
-        fetchGetGroupedAoi(true);
+        fetchGetGroupedAoi();
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
 
     // ログアウト
@@ -80,7 +80,7 @@ export default function Mypage() {
     };
 
     // 作成したグループを取得
-    const fetchGetGroupedAoi = async (autoSelectFirst = true) => {
+    const fetchGetGroupedAoi = async () => {
         try {
             const res = await fetch("http://localhost:8000/grouped-aoi", {
                 method: "GET",
@@ -92,16 +92,19 @@ export default function Mypage() {
                 return;
             }
 
-            const data = await res.json();
-            setGroupedAois(data);
-            // GAを取得した時は、選択状態が必ず先頭になる。新規作成の時は、fetchGetGroupedAoiの後で選択をセットし直すべし。
-            if (autoSelectFirst && data.length > 0) {
-                setSelectedGA(data[0].id)
+            const groups = await res.json();
+            setGroupedAois(groups);
+            if ((selectedGA === undefined) && groups.length > 0) {
+                setSelectedGA(groups[0].id)
             }
         } catch (error) {
             console.error("通信エラー:", error);
         }
     };
+
+    useEffect(() => {
+        console.log("selectedGAが変更されました:", selectedGA);
+    }, [selectedGA]);
 
     return (
         <div className="flex h-screen">
@@ -193,7 +196,7 @@ export default function Mypage() {
                                 {/* React Leaflet */}
                                 <MapViewer
                                     onFeatureClick={(feature) => {
-                                        console.log("選択されたポリゴン:", feature.properties);
+                                        // console.log("選択されたポリゴン:", feature.properties);
 
                                         (async () => {
                                             const polygonId = feature.properties?.polygon_uuid;
@@ -201,11 +204,12 @@ export default function Mypage() {
                                                 console.warn("polygon_uuid が取得できませんでした");
                                                 return;
                                             }
+                                            console.log(`http://localhost:8000/grouped-aoi/${selectedGA}/${polygonId}`);
                                             const res = await fetch(`http://localhost:8000/grouped-aoi/${selectedGA}/${polygonId}`, {
                                                 method: "POST",
                                                 credentials: "include"
                                             });
-                                            await fetchGetGroupedAoi(false); // 作成したグループをDBから取得し直す。
+                                            await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
                                         })();
                                     }}
                                     selectedFeatures={
@@ -224,7 +228,9 @@ export default function Mypage() {
                                                 main={group.name}
                                                 sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                                                onClick={() => setSelectedGA(group.id)}
+                                                onClick={() => {
+                                                    setSelectedGA(group.id);
+                                                }}
                                             />
                                         ))}
 
@@ -240,7 +246,7 @@ export default function Mypage() {
                                                     },
                                                     body: JSON.stringify({ name: "新しいグループ" }),
                                                 });
-                                                await fetchGetGroupedAoi(false); // 作成したグループをDBから取得し直す。
+                                                await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
                                                 const new_grouop = await res.json();
                                                 setSelectedGA(new_grouop.id);
                                             }}
