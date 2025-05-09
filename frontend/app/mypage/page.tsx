@@ -51,7 +51,7 @@ export default function Mypage() {
         };
 
         fetchProfile(); // useEffectは非同期にできないので中で非同期として定義して呼び出す。
-        fetchGetGroupedAoi();
+        fetchGetGroupedAoi(true);
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
 
     // ログアウト
@@ -80,7 +80,7 @@ export default function Mypage() {
     };
 
     // 作成したグループを取得
-    const fetchGetGroupedAoi = async () => {
+    const fetchGetGroupedAoi = async (autoSelectFirst = true) => {
         try {
             const res = await fetch("http://localhost:8000/grouped-aoi", {
                 method: "GET",
@@ -95,7 +95,7 @@ export default function Mypage() {
             const data = await res.json();
             setGroupedAois(data);
             // GAを取得した時は、選択状態が必ず先頭になる。新規作成の時は、fetchGetGroupedAoiの後で選択をセットし直すべし。
-            if (data.length > 0) {
+            if (autoSelectFirst && data.length > 0) {
                 setSelectedGA(data[0].id)
             }
         } catch (error) {
@@ -205,11 +205,12 @@ export default function Mypage() {
                                                 method: "POST",
                                                 credentials: "include"
                                             });
-                                            const temp = selectedGA;
-                                            await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
-                                            setSelectedGA(temp);
+                                            await fetchGetGroupedAoi(false); // 作成したグループをDBから取得し直す。
                                         })();
                                     }}
+                                    selectedFeatures={
+                                        groupedAois.find((g) => g.id === selectedGA)?.featureCollection.features ?? []
+                                    }
                                 />
 
                                 {/* 作成したグループ */}
@@ -239,7 +240,7 @@ export default function Mypage() {
                                                     },
                                                     body: JSON.stringify({ name: "新しいグループ" }),
                                                 });
-                                                await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                                await fetchGetGroupedAoi(false); // 作成したグループをDBから取得し直す。
                                                 const new_grouop = await res.json();
                                                 setSelectedGA(new_grouop.id);
                                             }}

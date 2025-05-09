@@ -43,10 +43,16 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
 
 export default function Map({
   onFeatureClick,
+  selectedFeatures
 }: {
   onFeatureClick?: (feature: GeoJSON.Feature) => void;
+  selectedFeatures: GeoJSON.Feature[];
 }) {
   const [featureCollection, setFeatureCollection] = useState<FeatureCollection | null>(null); // オーバーレイする筆ポリゴン
+
+  const isSelected = (feature: GeoJSON.Feature | undefined) => {
+    return selectedFeatures.some(f => f.properties?.polygon_uuid === feature?.properties?.polygon_uuid);
+  };
 
   return (
     <MapContainer
@@ -68,12 +74,14 @@ export default function Map({
             let fillColor = "red";
             let borderColor = "darkred";
 
-            if (landType === 100) {
-              fillColor = "yellow";
-              borderColor = "#bfa500"; // 黄土色寄りの落ち着いた色
-            } else if (landType === 200) {
-              fillColor = "green";
-              borderColor = "darkgreen";
+            if (!isSelected(feature)) {
+              if (landType === 100) {
+                fillColor = "yellow";
+                borderColor = "#bfa500"; // 黄土色寄りの落ち着いた色
+              } else if (landType === 200) {
+                fillColor = "green";
+                borderColor = "darkgreen";
+              }
             }
 
             return {
