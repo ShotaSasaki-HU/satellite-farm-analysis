@@ -45,7 +45,7 @@ export default function Map({
   onFeatureClick,
   selectedFeatures
 }: {
-  onFeatureClick?: (feature: GeoJSON.Feature) => void;
+  onFeatureClick: (feature: GeoJSON.Feature) => void;
   selectedFeatures: GeoJSON.Feature[];
 }) {
   const [featureCollection, setFeatureCollection] = useState<FeatureCollection | null>(null); // オーバーレイする筆ポリゴン

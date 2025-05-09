@@ -24,7 +24,7 @@ export default function Mypage() {
             featureCollection: FeatureCollection;
         }[]
     >([]);
-    const [selectedGA, setSelectedGA] = useState<number>();
+    const [selectedGA, setSelectedGA] = useState<number | null>(null);
 
     // 初期化の処理
     useEffect(() => {
@@ -94,7 +94,7 @@ export default function Mypage() {
 
             const groups = await res.json();
             setGroupedAois(groups);
-            if ((selectedGA === undefined) && groups.length > 0) {
+            if ((selectedGA === null) && groups.length > 0) {
                 setSelectedGA(groups[0].id)
             }
         } catch (error) {
@@ -102,8 +102,9 @@ export default function Mypage() {
         }
     };
 
+    // selectedGAの変更監視哨
     useEffect(() => {
-        console.log("selectedGAが変更されました:", selectedGA);
+        console.log(`$selectedGAの変更: ${selectedGA}`);
     }, [selectedGA]);
 
     return (
@@ -228,9 +229,7 @@ export default function Mypage() {
                                                 main={group.name}
                                                 sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
-                                                onClick={() => {
-                                                    setSelectedGA(group.id);
-                                                }}
+                                                onClick={() => setSelectedGA(group.id)}
                                             />
                                         ))}
 
