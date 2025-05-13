@@ -1,12 +1,14 @@
 "use client";
 
-import type { MouseEventHandler } from "react";
+import type { MouseEventHandler, ReactNode } from "react";
 
 interface ListItemProps {
     main: string;
     sub?: string;
     className?: string;
     onClick?: MouseEventHandler<HTMLLIElement>;
+    rightElement?: ReactNode;
+    onRightClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
 export default function ListItem({
@@ -14,6 +16,8 @@ export default function ListItem({
     sub,
     className = "flex justify-between items-center py-2 px-4 cursor-pointer hover:bg-green-100 rounded-lg",
     onClick,
+    rightElement,
+    onRightClick
 }: ListItemProps) {
     return (
         <li
@@ -21,11 +25,17 @@ export default function ListItem({
             onClick={onClick}
         >
             <div className="flex-1 flex flex-col items-start">
-                <span className="text-lg">{ main }</span>
-                <span className="text-base">{ sub }</span>
+                <span className="text-lg">{main}</span>
+                <span className="text-base">{sub}</span>
             </div>
-            <button className="w-[25%] text-green-600">
-                編集
+            <button
+                className="w-[25%] text-green-600 flex justify-center items-center"
+                onClick={(e) => {
+                    e.stopPropagation(); // ← liのonClickを止める（重要）
+                    onRightClick?.(e);
+                }}
+            >
+                {rightElement}
             </button>
         </li>
     );

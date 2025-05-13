@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus } from "lucide-react";
+import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListItem from "../components/ListItem";
 import { FeatureCollection } from "geojson";
@@ -105,7 +105,7 @@ export default function Mypage() {
 
     // selectedGAの変更監視哨
     useEffect(() => {
-        console.log(`$selectedGAの変更: ${selectedGA}`);
+        // console.log(`$selectedGAの変更: ${selectedGA}`);
         selectedGARef.current = selectedGA; // selectedGAが変わるたびにrefも更新
     }, [selectedGA]);
 
@@ -236,6 +236,8 @@ export default function Mypage() {
                                                 sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                                                 onClick={() => setSelectedGA(group.id)}
+                                                rightElement={<Trash2 className="w-6 h-6 cursor-pointer hover:text-red-500 hover:w-8 hover:h-8" />}
+                                                onRightClick={() => console.log("右のXボタンがクリックされた")}
                                             />
                                         ))}
 
