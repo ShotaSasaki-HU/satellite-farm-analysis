@@ -1,7 +1,7 @@
 // app/mypage/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListItem from "../components/ListItem";
@@ -25,6 +25,7 @@ export default function Mypage() {
         }[]
     >([]);
     const [selectedGA, setSelectedGA] = useState<number | null>(null);
+    const selectedGARef = useRef<number | null>(null);
 
     // 初期化の処理
     useEffect(() => {
@@ -105,7 +106,23 @@ export default function Mypage() {
     // selectedGAの変更監視哨
     useEffect(() => {
         console.log(`$selectedGAの変更: ${selectedGA}`);
+        selectedGARef.current = selectedGA; // selectedGAが変わるたびにrefも更新
     }, [selectedGA]);
+
+    const handleFeatureClick = async (feature: any) => {
+        const polygonId = feature.properties?.polygon_uuid;
+        if (!polygonId) {
+            console.warn("polygon_uuid が取得できませんでした");
+            return;
+        }
+        const currentGA = selectedGARef.current;
+        console.log(`http://localhost:8000/grouped-aoi/${currentGA}/${polygonId}`);
+        const res = await fetch(`http://localhost:8000/grouped-aoi/${currentGA}/${polygonId}`, {
+            method: "POST",
+            credentials: "include"
+        });
+        await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+    };
 
     return (
         <div className="flex h-screen">
@@ -196,23 +213,7 @@ export default function Mypage() {
                             <div className="flex border-1 border-gray-400">
                                 {/* React Leaflet */}
                                 <MapViewer
-                                    onFeatureClick={(feature) => {
-                                        // console.log("選択されたポリゴン:", feature.properties);
-
-                                        (async () => {
-                                            const polygonId = feature.properties?.polygon_uuid;
-                                            if (!polygonId) {
-                                                console.warn("polygon_uuid が取得できませんでした");
-                                                return;
-                                            }
-                                            console.log(`http://localhost:8000/grouped-aoi/${selectedGA}/${polygonId}`);
-                                            const res = await fetch(`http://localhost:8000/grouped-aoi/${selectedGA}/${polygonId}`, {
-                                                method: "POST",
-                                                credentials: "include"
-                                            });
-                                            await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
-                                        })();
-                                    }}
+                                    onFeatureClick={handleFeatureClick}
                                     selectedFeatures={
                                         groupedAois.find((g) => g.id === selectedGA)?.featureCollection.features ?? []
                                     }
