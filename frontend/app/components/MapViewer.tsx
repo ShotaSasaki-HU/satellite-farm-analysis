@@ -125,6 +125,11 @@ export default function Map({
             const landType = feature?.properties.land_type;
             let fillColor = "red";
             let borderColor = "darkred";
+            if (landType === 100) {
+              borderColor = "#bfa500"; // 黄土色寄りの落ち着いた色
+            } else if (landType === 200) {
+              borderColor = "darkgreen";
+            }
 
             if (!isSelected(feature)) {
               if (landType === 100) {
