@@ -65,21 +65,35 @@ def get_grouped_aoi(
 
 #######################################################
 
-class GroupedAoiCreate(BaseModel):
-    name: str
-
-@router.post("/create-grouped-aoi")
+@router.post("/create-grouped-aoi/{name}")
 def create_grouped_aoi(
-    data: GroupedAoiCreate,
+    name: str,
     db: db_dependency,
     current_user: User = Depends(get_current_user)
 ):
-    new_group = GroupedAoi(name = data.name, user_id = current_user.id)
+    new_group = GroupedAoi(name = name, user_id = current_user.id)
     db.add(new_group)
     db.commit()
     db.refresh(new_group) # 自動採番されたidがここで入る。サーバー側でidを振って、idの重複を防止。¥
 
     return new_group
+
+@router.post("/delete-grouped-aoi/{id}")
+def create_grouped_aoi(
+    id: int,
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)
+):
+    target_group = db.query(GroupedAoi).filter(
+        GroupedAoi.id == id,
+        GroupedAoi.user_id == current_user.id
+    ).first()
+
+    if not target_group:
+        raise HTTPException(status_code=404, detail="指定されたIDのGroupedAoiが見つかりません．")
+
+    db.delete(target_group)
+    db.commit()
 
 #######################################################
 
@@ -95,7 +109,7 @@ def add_feature_to_group(
     fude = db.query(Fude).filter_by(uuid=fude_uuid).first()
 
     if not grouped_aoi or not fude:
-        raise HTTPException(status_code=404, detail="グループまたは筆ポリゴンが見つかりません。")
+        raise HTTPException(status_code=404, detail="グループまたは筆ポリゴンが見つかりません．")
 
     # すでに紐づいているかを確認
     if fude in grouped_aoi.fudes:

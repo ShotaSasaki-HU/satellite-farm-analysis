@@ -11,19 +11,19 @@ const MapViewer = dynamic(() => import("../components/MapViewer"), {
     ssr: false,
 });
 
+interface GroupedAoi {
+    id: number;
+    name: string;
+    featureCollection: FeatureCollection;
+}
+
 export default function Mypage() {
     const [selectedSidebar, setSelectedSidebar] = useState<string>("account"); // サイドバーの選択状態
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true); // サイドバーの開閉状態
     const [userId, setUserId] = useState<number>();
     const [userEmail, setUserEmail] = useState<string>("");
     const [userName, setUserName] = useState<string>("");
-    const [groupedAois, setGroupedAois] = useState< // 作成したグループ（筆ポリゴンを内包）
-        {
-            id: number;
-            name: string;
-            featureCollection: FeatureCollection;
-        }[]
-    >([]);
+    const [groupedAois, setGroupedAois] = useState<GroupedAoi[]>([]); // 作成したグループ（筆ポリゴンを内包）
     const [selectedGA, setSelectedGA] = useState<number | null>(null);
     const selectedGARef = useRef<number | null>(null);
 
@@ -93,9 +93,9 @@ export default function Mypage() {
                 return;
             }
 
-            const groups = await res.json();
+            const groups: GroupedAoi[] = await res.json();
             setGroupedAois(groups);
-            if ((selectedGA === null) && groups.length > 0) {
+            if ((selectedGA === null || !groups.some(group => group.id === selectedGA)) && groups.length > 0) {
                 setSelectedGA(groups[0].id)
             }
         } catch (error) {
@@ -105,7 +105,7 @@ export default function Mypage() {
 
     // selectedGAの変更監視哨
     useEffect(() => {
-        // console.log(`$selectedGAの変更: ${selectedGA}`);
+        console.log(`$selectedGAの変更: ${selectedGA}`);
         selectedGARef.current = selectedGA; // selectedGAが変わるたびにrefも更新
     }, [selectedGA]);
 
@@ -236,29 +236,40 @@ export default function Mypage() {
                                                 sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                                                 onClick={() => setSelectedGA(group.id)}
-                                                rightElement={<Trash2 className="w-6 h-6 cursor-pointer hover:text-red-500 hover:w-8 hover:h-8" />}
-                                                onRightClick={() => console.log("右のXボタンがクリックされた")}
+                                                rightElement={""}
+                                                onRightClick={() => console.log("右の要素がクリックされた")}
                                             />
                                         ))}
 
                                         {/* グループ作成ボタン */}
                                         <li
-                                            className="flex justify-center items-center cursor-pointer hover:text-green-400 my-3"
-                                            onClick={async () => {
-                                                const res = await fetch("http://localhost:8000/create-grouped-aoi", {
-                                                    method: "POST",
-                                                    credentials: "include",
-                                                    headers: {
-                                                        "Content-Type": "application/json",
-                                                    },
-                                                    body: JSON.stringify({ name: "新しいグループ" }),
-                                                });
-                                                await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
-                                                const new_grouop = await res.json();
-                                                setSelectedGA(new_grouop.id);
-                                            }}
+                                            className="flex justify-around items-center my-3"
                                         >
-                                            <FolderPlus className="w-8 h-8" />
+                                            <FolderPlus
+                                                className="w-8 h-8 cursor-pointer hover:text-green-400"
+                                                onClick={async () => {
+                                                    const name = "新しいグループ";
+                                                    const res = await fetch(`http://localhost:8000/create-grouped-aoi/${name}`, {
+                                                        method: "POST",
+                                                        credentials: "include"
+                                                    });
+                                                    await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                                    const new_grouop = await res.json();
+                                                    setSelectedGA(new_grouop.id);
+                                                }}
+                                            />
+                                            <Trash2
+                                                className="w-8 h-8 cursor-pointe hover:text-red-500"
+                                                onClick={async () => {
+                                                    if (groupedAois.length > 0) {
+                                                        const res = await fetch(`http://localhost:8000/delete-grouped-aoi/${selectedGA}`, {
+                                                            method: "POST",
+                                                            credentials: "include"
+                                                        });
+                                                        await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
+                                                    }
+                                                }}
+                                            />
                                         </li>
                                     </ul>
                                 </div>
