@@ -2,9 +2,10 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, GeoJSON, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMapEvents, useMap } from "react-leaflet";
 import { FeatureCollection } from "geojson";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import L from "leaflet";
 
 // 視点近傍の筆ポリゴンを取得（地図イベント監視 + API送信）
 function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: FeatureCollection) => void }) {
@@ -41,12 +42,63 @@ function MapEventHandler({ setFeatureCollection }: { setFeatureCollection: (f: F
   return null;
 }
 
+function SelectedFeatureFitBounds({
+  selectedFeatures,
+  selectedGA,
+  setFeatureCollection
+}: {
+  selectedFeatures: GeoJSON.Feature[];
+  selectedGA: number | null;
+  setFeatureCollection: (f: FeatureCollection) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!selectedFeatures || selectedFeatures.length === 0) return;
+
+    const latlngs: L.LatLngExpression[] = [];
+
+    selectedFeatures.forEach((feature) => {
+      const geom = feature.geometry;
+      if (geom.type === "Polygon") { // Geometryはユニオン型より，型チェックを通すためにtypeを絞る．
+        const coords = geom.coordinates[0];
+        coords.forEach(([lng, lat]) => latlngs.push([lat, lng]));
+      } else {
+        console.log("SelectedFeatureFitBounds: Feature.geometryの型がPolygonではありません．");
+      }
+    });
+
+    if (latlngs.length > 0) {
+      const bounds = L.latLngBounds(latlngs);
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+
+    // MapEventHandlerは瞬間移動だと発火しないため，ここで再描画する．
+    fetch(
+      `http://localhost:8000/fudes?lat=${map.getCenter().lat}&lon=${map.getCenter().lng}&zoom=${map.getZoom()}`,
+      {
+        method: "GET",
+        credentials: "include", // Cookie
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log("筆ポリゴン受け取り");
+        setFeatureCollection(data as FeatureCollection);
+      });
+  }, [selectedGA]);
+
+  return null;
+}
+
 export default function Map({
   onFeatureClick,
-  selectedFeatures
+  selectedFeatures,
+  selectedGA
 }: {
   onFeatureClick: (feature: GeoJSON.Feature) => void;
   selectedFeatures: GeoJSON.Feature[];
+  selectedGA: number | null;
 }) {
   const [featureCollection, setFeatureCollection] = useState<FeatureCollection | null>(null); // オーバーレイする筆ポリゴン
 
@@ -102,6 +154,11 @@ export default function Map({
       )}
 
       <MapEventHandler setFeatureCollection={setFeatureCollection} />
+      <SelectedFeatureFitBounds
+        selectedFeatures={selectedFeatures}
+        selectedGA={selectedGA}
+        setFeatureCollection={setFeatureCollection}
+      />
     </MapContainer>
   );
 }

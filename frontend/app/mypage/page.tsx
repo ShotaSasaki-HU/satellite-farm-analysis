@@ -221,6 +221,7 @@ export default function Mypage() {
                                     selectedFeatures={
                                         groupedAois.find((g) => g.id === selectedGA)?.featureCollection.features ?? []
                                     }
+                                    selectedGA={selectedGA}
                                 />
 
                                 {/* 作成したグループ */}
