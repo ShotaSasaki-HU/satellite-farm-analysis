@@ -74,7 +74,7 @@ def create_grouped_aoi(
     new_group = GroupedAoi(name = name, user_id = current_user.id)
     db.add(new_group)
     db.commit()
-    db.refresh(new_group) # 自動採番されたidがここで入る。サーバー側でidを振って、idの重複を防止。¥
+    db.refresh(new_group) # 自動採番されたidがここで入る．サーバー側でidを振って，idの重複を防止．
 
     return new_group
 
