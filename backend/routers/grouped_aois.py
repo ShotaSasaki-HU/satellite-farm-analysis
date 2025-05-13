@@ -79,7 +79,7 @@ def create_grouped_aoi(
     return new_group
 
 @router.post("/delete-grouped-aoi/{id}")
-def create_grouped_aoi(
+def delete_grouped_aoi(
     id: int,
     db: db_dependency,
     current_user: User = Depends(get_current_user)
