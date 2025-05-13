@@ -109,13 +109,17 @@ export default function Mypage() {
         selectedGARef.current = selectedGA; // selectedGAが変わるたびにrefも更新
     }, [selectedGA]);
 
-    const handleFeatureClick = async (feature: any) => {
+    const handleFeatureClick = async (feature: GeoJSON.Feature) => {
         const polygonId = feature.properties?.polygon_uuid;
         if (!polygonId) {
-            console.warn("polygon_uuid が取得できませんでした");
+            console.log("handleFeatureClick: polygon_uuidが取得できませんでした．");
             return;
         }
         const currentGA = selectedGARef.current;
+        if (!currentGA) {
+            console.log("handleFeatureClick: selectedGAがnullです．");
+            return;
+        }
         console.log(`http://localhost:8000/grouped-aoi/${currentGA}/${polygonId}`);
         const res = await fetch(`http://localhost:8000/grouped-aoi/${currentGA}/${polygonId}`, {
             method: "POST",
