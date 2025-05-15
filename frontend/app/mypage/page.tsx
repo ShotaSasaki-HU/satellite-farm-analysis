@@ -236,6 +236,7 @@ export default function Mypage() {
                                     <span>：畑（選択中）</span>
                                 </li>
                             </ul>
+                            <p>※グループ名を変更したい場合は，グループ名をダブルクリックして下さい．</p>
                             <div className="flex border-1 border-gray-400">
                                 {/* React Leaflet */}
                                 <MapViewer
