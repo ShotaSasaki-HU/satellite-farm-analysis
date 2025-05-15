@@ -124,7 +124,7 @@ export default function Map({
           style={(feature) => { // featureには、GeoJSONの中の各Featureオブジェクトが1つずつ引数として渡される。
             const landType = feature?.properties.land_type;
             let fillColor = "red";
-            let borderColor = "darkred";
+            let borderColor = "";
             if (landType === 100) {
               borderColor = "#bfa500"; // 黄土色寄りの落ち着いた色
             } else if (landType === 200) {
@@ -134,10 +134,8 @@ export default function Map({
             if (!isSelected(feature)) {
               if (landType === 100) {
                 fillColor = "yellow";
-                borderColor = "#bfa500"; // 黄土色寄りの落ち着いた色
               } else if (landType === 200) {
                 fillColor = "green";
-                borderColor = "darkgreen";
               }
             }
 

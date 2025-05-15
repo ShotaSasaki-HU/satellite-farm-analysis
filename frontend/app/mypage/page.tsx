@@ -1,6 +1,8 @@
 // app/mypage/page.tsx
 "use client";
 
+import "tailwindcss"; // globals.cssが効いてない？
+
 import { useState, useEffect, useRef } from "react";
 import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -213,9 +215,15 @@ export default function Mypage() {
                         </div>
                     )}
                     {selectedSidebar === "map" && (
-                        <div className="text-center">
-                            <h1 className="text-3xl font-bold text-green-800">農地を選ぶ</h1>
-                            <p>地図を使って農地（関心領域）を選びます。</p>
+                        <div> {/* divタグ消しちゃだめ？ */}
+                            <h1 className="text-3xl font-bold text-green-800 text-center">農地を選ぶ</h1>
+                            <p className="text-center">地図を使って農地（関心領域）を選びます。</p>
+                            <ul className="flex justify-around items-center">
+                                <li className="flex justify-center items-center">
+                                    <div className="border border-[#bfa500] bg-yellow-300 w-8 h-8"></div>
+                                    <span>：田</span>
+                                </li>
+                            </ul>
                             <div className="flex border-1 border-gray-400">
                                 {/* React Leaflet */}
                                 <MapViewer
