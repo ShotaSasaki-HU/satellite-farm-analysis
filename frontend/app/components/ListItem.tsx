@@ -3,7 +3,7 @@
 import type { MouseEventHandler, ReactNode } from "react";
 
 interface ListItemProps {
-    main: string;
+    main: ReactNode;
     sub?: string;
     className?: string;
     onClick?: MouseEventHandler<HTMLLIElement>;
@@ -12,7 +12,7 @@ interface ListItemProps {
 }
 
 export default function ListItem({
-    main = "main",
+    main,
     sub,
     className = "flex justify-between items-center py-2 px-4 cursor-pointer hover:bg-green-100 rounded-lg",
     onClick,

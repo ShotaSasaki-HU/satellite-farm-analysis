@@ -95,6 +95,23 @@ def delete_grouped_aoi(
     db.delete(target_group)
     db.commit()
 
+# グループ名の変更
+class RenameRequest(BaseModel):
+    name: str
+
+@router.post("/rename-grouped-aoi/{group_id}")
+def rename_grouped_aoi(
+    group_id: int,
+    request: RenameRequest,
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)
+):
+    group = db.query(GroupedAoi).get(group_id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found.")
+    group.name = request.name
+    db.commit()
+
 #######################################################
 
 @router.post("/grouped-aoi/{group_id}/{fude_uuid}")

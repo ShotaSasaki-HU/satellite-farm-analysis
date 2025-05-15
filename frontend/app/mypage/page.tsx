@@ -26,6 +26,8 @@ export default function Mypage() {
     const [groupedAois, setGroupedAois] = useState<GroupedAoi[]>([]); // 作成したグループ（筆ポリゴンを内包）
     const [selectedGA, setSelectedGA] = useState<number | null>(null);
     const selectedGARef = useRef<number | null>(null);
+    const [editGroupId, setEditGroupId] = useState<number | null>(null);
+    const [editingName, setEditingName] = useState(""); // 編集中の名前
 
     // 初期化の処理
     useEffect(() => {
@@ -232,7 +234,45 @@ export default function Mypage() {
                                         {groupedAois.map((group, index) => (
                                             <ListItem
                                                 key={group.id}
-                                                main={group.name}
+                                                main={
+                                                    editGroupId === group.id ? ( // 編集中か否か
+                                                        <input
+                                                            className="border rounded px-2 py-1 w-full"
+                                                            value={editingName}
+                                                            autoFocus
+                                                            onChange={(e) => setEditingName(e.target.value)}
+                                                            onBlur={async () => {
+                                                                if (editingName !== group.name && editingName.trim() !== "") {
+                                                                    await fetch(`http://localhost:8000/rename-grouped-aoi/${group.id}`, {
+                                                                        method: "POST",
+                                                                        credentials: "include",
+                                                                        headers: {
+                                                                            "Content-Type": "application/json"
+                                                                        },
+                                                                        body: JSON.stringify({ name: editingName })
+                                                                    });
+                                                                    await fetchGetGroupedAoi();
+                                                                }
+                                                                setEditGroupId(null); // 編集モード終了
+                                                            }}
+                                                            onKeyDown={async (e) => {
+                                                                if (e.key === "Enter") {
+                                                                    e.currentTarget.blur(); // blurと同じ動作
+                                                                } else if (e.key === "Escape") {
+                                                                    setEditGroupId(null); // キャンセル
+                                                                }
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        // 編集モードに突入
+                                                        <span onDoubleClick={() => {
+                                                            setEditGroupId(group.id);
+                                                            setEditingName(group.name);
+                                                        }}>
+                                                            {group.name}
+                                                        </span>
+                                                    )
+                                                }
                                                 sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                                                 onClick={() => setSelectedGA(group.id)}
