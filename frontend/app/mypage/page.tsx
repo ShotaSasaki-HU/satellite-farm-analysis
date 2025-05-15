@@ -218,10 +218,22 @@ export default function Mypage() {
                         <div> {/* divタグ消しちゃだめ？ */}
                             <h1 className="text-3xl font-bold text-green-800 text-center">農地を選ぶ</h1>
                             <p className="text-center">地図を使って農地（関心領域）を選びます。</p>
-                            <ul className="flex justify-around items-center">
-                                <li className="flex justify-center items-center">
-                                    <div className="border border-[#bfa500] bg-yellow-300 w-8 h-8"></div>
+                            <ul className="flex justify-around items-center my-3">
+                                <li className="flex items-center">
+                                    <div className="border-2 border-[#c0ad3e] bg-[#f7f895] w-8 h-8 rounded"></div>
                                     <span>：田</span>
+                                </li>
+                                <li className="flex items-center">
+                                    <div className="border-2 border-[#c0ad3e] bg-[#ed9186] w-8 h-8 rounded"></div>
+                                    <span>：田（選択中）</span>
+                                </li>
+                                <li className="flex items-center">
+                                    <div className="border-2 border-[#2e661d] bg-[#94b685] w-8 h-8 rounded"></div>
+                                    <span>：畑</span>
+                                </li>
+                                <li className="flex items-center">
+                                    <div className="border-2 border-[#2e661d] bg-[#ed9186] w-8 h-8 rounded"></div>
+                                    <span>：畑（選択中）</span>
                                 </li>
                             </ul>
                             <div className="flex border-1 border-gray-400">
