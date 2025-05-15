@@ -218,6 +218,8 @@ export default function Mypage() {
                         <div> {/* divタグ消しちゃだめ？ */}
                             <h1 className="text-3xl font-bold text-green-800 text-center">農地を選ぶ</h1>
                             <p className="text-center">地図を使って農地（関心領域）を選びます。</p>
+                            <hr className="border-t border-gray-300 mt-6" />
+                            
                             <ul className="flex justify-around items-center my-3">
                                 <li className="flex items-center">
                                     <div className="border-2 border-[#c0ad3e] bg-[#f7f895] w-8 h-8 rounded"></div>
