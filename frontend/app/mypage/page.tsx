@@ -276,7 +276,7 @@ export default function Mypage() {
                                                 sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                                                 onClick={() => setSelectedGA(group.id)}
-                                                rightElement={""}
+                                                rightElement={null}
                                                 onRightClick={() => console.log("右の要素がクリックされた")}
                                             />
                                         ))}

@@ -7,7 +7,7 @@ interface ListItemProps {
     sub?: string;
     className?: string;
     onClick?: MouseEventHandler<HTMLLIElement>;
-    rightElement?: ReactNode;
+    rightElement: ReactNode | null;
     onRightClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
@@ -16,7 +16,7 @@ export default function ListItem({
     sub,
     className = "flex justify-between items-center py-2 px-4 cursor-pointer hover:bg-green-100 rounded-lg",
     onClick,
-    rightElement,
+    rightElement = null,
     onRightClick
 }: ListItemProps) {
     return (
@@ -28,15 +28,17 @@ export default function ListItem({
                 <span className="text-lg">{main}</span>
                 <span className="text-base">{sub}</span>
             </div>
-            <button
-                className="w-[25%] text-green-600 flex justify-center items-center"
-                onClick={(e) => {
-                    e.stopPropagation(); // ← liのonClickを止める（重要）
-                    onRightClick?.(e);
-                }}
-            >
-                {rightElement}
-            </button>
+            {rightElement &&
+                <button
+                    className="w-[25%] text-green-600 flex justify-center items-center"
+                    onClick={(e) => {
+                        e.stopPropagation(); // ← liのonClickを止める（重要）
+                        onRightClick?.(e);
+                    }}
+                >
+                    {rightElement}
+                </button>
+            }
         </li>
     );
 }
