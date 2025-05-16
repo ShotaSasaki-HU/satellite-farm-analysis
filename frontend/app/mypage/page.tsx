@@ -220,7 +220,7 @@ export default function Mypage() {
                             <p className="text-center">地図を使って農地（関心領域）を選びます。</p>
                             <hr className="border-t border-gray-300 mt-6" />
                             
-                            <ul className="flex justify-around items-center my-3">
+                            <ul className="flex justify-center items-center my-3 gap-6">
                                 <li className="flex items-center">
                                     <div className="border-2 border-[#c0ad3e] bg-[#f7f895] w-8 h-8 rounded"></div>
                                     <span>：田</span>
@@ -238,7 +238,7 @@ export default function Mypage() {
                                     <span>：畑（選択中）</span>
                                 </li>
                             </ul>
-                            <p>※グループ名を変更したい場合は，グループ名をダブルクリックして下さい．</p>
+                            <p className="text-right">※グループ名を変更したい場合は，グループ名をダブルクリックして下さい．</p>
                             <div className="flex border-1 border-gray-400">
                                 {/* React Leaflet */}
                                 <MapViewer
