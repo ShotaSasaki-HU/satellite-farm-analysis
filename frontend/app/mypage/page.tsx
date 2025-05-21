@@ -125,6 +125,7 @@ export default function Mypage() {
             return;
         }
         console.log(`http://localhost:8000/grouped-aoi/${currentGA}/${polygonId}`);
+        console.log(feature.geometry);
         const res = await fetch(`http://localhost:8000/grouped-aoi/${currentGA}/${polygonId}`, {
             method: "POST",
             credentials: "include"
