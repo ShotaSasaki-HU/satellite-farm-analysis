@@ -104,7 +104,7 @@ export default function Mypage() {
                 setSelectedGA(groups[0].id)
             }
         } catch (error) {
-            console.error("通信エラー:", error);
+            console.error("fetchGetGroupedAoiにおけるエラー:", error);
         }
     };
 
@@ -134,8 +134,33 @@ export default function Mypage() {
         await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
     };
 
-    const startAnalysis = (group_id: number) => {
-        console.log(`グループ（id: ${group_id}）の分析開始`);
+    const startAnalysis = async (group_id: number) => {
+        // console.log(`グループ（id: ${group_id}）の分析開始`);
+        await fetch(`http://localhost:8000/start-analysis/${group_id}`, {
+            method: "POST",
+            credentials: "include"
+        });
+        await fetchGetGroupedAoi(); // ボタンを更新するため．
+
+        const poll = async () => {
+            let status = "processing";
+            while (status === "processing") {
+                await new Promise((r) => setTimeout(r, 3 * 1000));
+
+                // fetchGetGroupedAoiして，groupedAoisでstatusを見ようとしても古いデータしか見れない．
+                const res = await fetch("http://localhost:8000/grouped-aoi", {
+                    method: "GET",
+                    credentials: "include", // これが HttpOnly Cookie の場合に必須
+                });
+                const data = await res.json();
+                const group: GroupedAoi | undefined = data.find(((g: any) => g.id === group_id));
+                status = group?.status || "unknown";
+
+                console.log(`group: ${group_id}, status: ${status}`);
+            }
+        };
+
+        poll();
     };
 
     return (
