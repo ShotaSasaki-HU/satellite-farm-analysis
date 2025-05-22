@@ -131,6 +131,9 @@ def add_feature_to_group(
 
     if not grouped_aoi or not fude:
         raise HTTPException(status_code=404, detail="グループまたは筆ポリゴンが見つかりません．")
+    
+    if grouped_aoi.status == "processing":
+        raise HTTPException(status_code=409, detail="このグループは既に分析中です．")
 
     # すでに紐づいているかを確認
     if fude in grouped_aoi.fudes:
