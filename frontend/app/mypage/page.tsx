@@ -17,6 +17,7 @@ interface GroupedAoi {
     id: number;
     name: string;
     featureCollection: FeatureCollection;
+    status: string; // 分析状態
 }
 
 export default function Mypage() {
@@ -221,7 +222,7 @@ export default function Mypage() {
                             <p className="text-center">地図を使って農地（関心領域）を選びます。</p>
                             <hr className="border-t border-gray-300 mt-6" />
                             
-                            <ul className="flex justify-center items-center my-3 gap-6">
+                            <ul className="flex justify-center items-center mt-6 mb-3 gap-6">
                                 <li className="flex items-center">
                                     <div className="border-2 border-[#c0ad3e] bg-[#f7f895] w-8 h-8 rounded"></div>
                                     <span>：田</span>
@@ -344,6 +345,10 @@ export default function Mypage() {
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を分析する</h1>
                             <p>選んだ農地（関心領域）の分析を行います。</p>
+                            <hr className="border-t border-gray-300 mt-6" />
+
+                            <h2 className="text-2xl font-bold mt-6 text-left">１．解析するグループを選ぶ</h2>
+
                         </div>
                     )}
                 </div>

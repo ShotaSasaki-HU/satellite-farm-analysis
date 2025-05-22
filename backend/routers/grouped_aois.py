@@ -58,7 +58,8 @@ def get_grouped_aoi(
             "featureCollection": {
                 "type": "FeatureCollection",
                 "features": features
-            }
+            },
+            "status": group.status
         })
 
     return result
@@ -71,7 +72,7 @@ def create_grouped_aoi(
     db: db_dependency,
     current_user: User = Depends(get_current_user)
 ):
-    new_group = GroupedAoi(name = name, user_id = current_user.id)
+    new_group = GroupedAoi(name = name, user_id = current_user.id, status = "unprocessed")
     db.add(new_group)
     db.commit()
     db.refresh(new_group) # 自動採番されたidがここで入る．サーバー側でidを振って，idの重複を防止．
@@ -91,6 +92,9 @@ def delete_grouped_aoi(
 
     if not target_group:
         raise HTTPException(status_code=404, detail="指定されたIDのGroupedAoiが見つかりません．")
+    
+    if target_group.status == "processing":
+        raise HTTPException(status_code=409, detail="分析処理中のグループは削除できません．")
 
     db.delete(target_group)
     db.commit()
