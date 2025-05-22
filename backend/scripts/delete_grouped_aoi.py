@@ -12,4 +12,6 @@ Base.metadata.create_all(bind=engine) # データベースに未作成のテー�
 session: Session = SessionLocal()
 session.query(GroupedAoi).delete()
 session.execute(grouped_aoi_fudes.delete()) # 中間テーブルの全行削除
+# session.query(GroupedAoi).filter_by(id=1).first().status = "completed"
+# session.query(GroupedAoi).filter_by(id=1).first().status = "failed"
 session.commit()

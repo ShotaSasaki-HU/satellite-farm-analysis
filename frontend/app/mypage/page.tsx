@@ -58,6 +58,14 @@ export default function Mypage() {
 
         fetchProfile(); // useEffectは非同期にできないので中で非同期として定義して呼び出す。
         fetchGetGroupedAoi();
+
+        // グループのstatus更新用
+        const intervalId = setInterval(() => {
+            fetchGetGroupedAoi();
+            // console.log("Interval Signal");
+        }, 30 * 1000);
+
+        return () => clearInterval(intervalId); // アンマウント時にクリア
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
 
     // ログアウト
@@ -141,26 +149,6 @@ export default function Mypage() {
             credentials: "include"
         });
         await fetchGetGroupedAoi(); // ボタンを更新するため．
-
-        const poll = async () => {
-            let status = "processing";
-            while (status === "processing") {
-                await new Promise((r) => setTimeout(r, 3 * 1000));
-
-                // fetchGetGroupedAoiして，groupedAoisでstatusを見ようとしても古いデータしか見れない．
-                const res = await fetch("http://localhost:8000/grouped-aoi", {
-                    method: "GET",
-                    credentials: "include", // これが HttpOnly Cookie の場合に必須
-                });
-                const data = await res.json();
-                const group: GroupedAoi | undefined = data.find(((g: any) => g.id === group_id));
-                status = group?.status || "unknown";
-
-                console.log(`group: ${group_id}, status: ${status}`);
-            }
-        };
-
-        poll();
     };
 
     return (
