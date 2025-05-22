@@ -62,8 +62,8 @@ export default function Mypage() {
         // グループのstatus更新用
         const intervalId = setInterval(() => {
             fetchGetGroupedAoi();
-            // console.log("Interval Signal");
-        }, 30 * 1000);
+            console.log("Interval Signal");
+        }, 5 * 1000);
 
         return () => clearInterval(intervalId); // アンマウント時にクリア
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
@@ -108,7 +108,8 @@ export default function Mypage() {
 
             const groups: GroupedAoi[] = await res.json();
             setGroupedAois(groups);
-            if ((selectedGA === null || !groups.some(group => group.id === selectedGA)) && groups.length > 0) {
+            const currentGA = selectedGARef.current; // selectedGAを直接書くと古い値を見てしまう？
+            if ((currentGA === null || !groups.some(group => group.id === currentGA)) && groups.length > 0) {
                 setSelectedGA(groups[0].id)
             }
         } catch (error) {
