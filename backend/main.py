@@ -11,11 +11,12 @@ from typing import Annotated
 from password_utils import verify_password, hash_password
 from datetime import timedelta
 from auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
-from routers import fudes, grouped_aois
+from routers import fudes, grouped_aois, analysis
 
 app = FastAPI()
 app.include_router(fudes.router)
 app.include_router(grouped_aois.router)
+app.include_router(analysis.router)
 
 # データベースに未作成のテーブルを作成
 Base.metadata.create_all(bind=engine)

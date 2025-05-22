@@ -30,7 +30,7 @@ def load_geojson(path: Path):
 @router.get("/grouped-aoi")
 def get_grouped_aoi(
     db: db_dependency,
-    current_user: User = Depends(get_current_user)  # ユーザーidを取得
+    current_user: User = Depends(get_current_user) # ユーザーidを取得
 ):
     grouped_aois = db.query(GroupedAoi).filter_by(user_id = current_user.id).all()
     
