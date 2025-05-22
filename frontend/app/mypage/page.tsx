@@ -4,7 +4,7 @@
 import "tailwindcss"; // globals.cssが効いてない？
 
 import { useState, useEffect, useRef } from "react";
-import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus, Trash2 } from "lucide-react";
+import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus, Trash2, LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListItem from "../components/ListItem";
 import { FeatureCollection } from "geojson";
@@ -134,6 +134,10 @@ export default function Mypage() {
         await fetchGetGroupedAoi(); // 作成したグループをDBから取得し直す。
     };
 
+    const startAnalysis = (group_id: number) => {
+        console.log(`グループ（id: ${group_id}）の分析開始`);
+    };
+
     return (
         <div className="flex h-screen">
             {/* Sidebar */}
@@ -221,7 +225,7 @@ export default function Mypage() {
                             <h1 className="text-3xl font-bold text-green-800 text-center">農地を選ぶ</h1>
                             <p className="text-center">地図を使って農地（関心領域）を選びます。</p>
                             <hr className="border-t border-gray-300 mt-6" />
-                            
+
                             <ul className="flex justify-center items-center mt-6 mb-3 gap-6">
                                 <li className="flex items-center">
                                     <div className="border-2 border-[#c0ad3e] bg-[#f7f895] w-8 h-8 rounded"></div>
@@ -349,6 +353,55 @@ export default function Mypage() {
 
                             <h2 className="text-2xl font-bold mt-6 text-left">１．解析するグループを選ぶ</h2>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                {groupedAois.map((group) => (
+                                    <div key={group.id} className="border rounded-xl p-4 shadow bg-white">
+                                        <h3 className="text-lg font-bold">{group.name}</h3>
+
+                                        {group.status === "unprocessed" && (
+                                            <button
+                                                onClick={() => startAnalysis(group.id)}
+                                                className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                            >
+                                                分析開始
+                                            </button>
+                                        )}
+
+                                        {group.status === "processing" && (
+                                            <button
+                                                disabled
+                                                className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded cursor-not-allowed"
+                                            >
+                                                <div className="flex justify-center items-center">
+                                                    <span className="mr-2">分析中…</span>
+                                                    <LoaderCircle className="w-6 h-6 animate-spin" />
+                                                </div>
+                                            </button>
+                                        )}
+
+                                        {group.status === "completed" && (
+                                            <button
+                                                disabled
+                                                className="mt-2 px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
+                                            >
+                                                分析済み
+                                            </button>
+                                        )}
+
+                                        {group.status === "failed" && (
+                                            <div className="mt-2">
+                                                <p className="text-red-600">分析に失敗しました．</p>
+                                                <button
+                                                    onClick={() => startAnalysis(group.id)}
+                                                    className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                                >
+                                                    再分析
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
