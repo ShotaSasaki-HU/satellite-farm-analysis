@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from database import Base # database.py
+import datetime
 # from sqlalchemy.dialects.postgresql import UUID
 
 # 中間テーブル（多対多：GroupedAoi と Fude）
@@ -33,6 +34,7 @@ class Fude(Base):
     centroid_lon = Column(Float, nullable=False) # 重心経度（検索用）
 
     grouped_aois = relationship("GroupedAoi", secondary=grouped_aoi_fudes, back_populates="fudes")
+    image_logs = relationship("ImageGetLog", back_populates="fude")
 
     __table_args__ = (
         Index("idx_lat", "centroid_lat"),
@@ -50,3 +52,17 @@ class GroupedAoi(Base):
 
     user = relationship("User", back_populates="grouped_aois")
     fudes = relationship("Fude", secondary=grouped_aoi_fudes, back_populates="grouped_aois")
+
+class ImageGetLog(Base):
+    __tablename__ = "image_get_logs"
+
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    polygon_uuid = Column(String, ForeignKey("fudes.uuid"), nullable=False, index=True) # 筆ポリゴンのuuid
+    checked_at = Column(DateTime, nullable=False)   # このログの記録日時
+    data_exists = Column(Boolean, nullable=False)   # Planetに画像が存在するか．
+    scene_id = Column(String, nullable=True)        # シーン（元の一枚絵）のid
+    acquired_date = Column(DateTime, nullable=True) # 画像の撮影日時
+    file_path = Column(String, nullable=True)       # 画像のパス
+    udm2_path = Column(String, nullable=True)       # UDM2のパス
+
+    fude = relationship("Fude", back_populates="image_logs")
