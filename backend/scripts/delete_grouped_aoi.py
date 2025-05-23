@@ -13,5 +13,5 @@ session: Session = SessionLocal()
 session.query(GroupedAoi).delete()
 session.execute(grouped_aoi_fudes.delete()) # 中間テーブルの全行削除
 # session.query(GroupedAoi).filter_by(id=1).first().status = "completed"
-# session.query(GroupedAoi).filter_by(id=1).first().status = "failed"
+# session.query(GroupedAoi).filter_by(id=1).first().status = "unprocessed"
 session.commit()
