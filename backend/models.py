@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index, Date, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from database import Base # database.py
-import datetime
 # from sqlalchemy.dialects.postgresql import UUID
 
 # 中間テーブル（多対多：GroupedAoi と Fude）
@@ -49,6 +48,7 @@ class GroupedAoi(Base):
     name = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
     status = Column(String, nullable=False)
+    analysis_start_date = Column(Date, nullable=False) # 分析始点日（とりあえずその年の元旦とする．）
 
     user = relationship("User", back_populates="grouped_aois")
     fudes = relationship("Fude", secondary=grouped_aoi_fudes, back_populates="grouped_aois")

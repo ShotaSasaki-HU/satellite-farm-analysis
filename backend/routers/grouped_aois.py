@@ -10,6 +10,7 @@ from auth import get_current_user
 import json
 from functools import lru_cache
 from pydantic import BaseModel
+from datetime import date
 
 router = APIRouter()
 
@@ -72,7 +73,12 @@ def create_grouped_aoi(
     db: db_dependency,
     current_user: User = Depends(get_current_user)
 ):
-    new_group = GroupedAoi(name = name, user_id = current_user.id, status = "unprocessed")
+    new_group = GroupedAoi(
+        name = name,
+        user_id = current_user.id,
+        status = "unprocessed",
+        analysis_start_date = date(date.today().year, 1, 1) # その年の元旦が分析始点日
+        )
     db.add(new_group)
     db.commit()
     db.refresh(new_group) # 自動採番されたidがここで入る．サーバー側でidを振って，idの重複を防止．
