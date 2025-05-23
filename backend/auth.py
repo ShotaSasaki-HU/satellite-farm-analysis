@@ -8,7 +8,6 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt
 
 from fastapi import Depends, HTTPException, Cookie
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from database import SessionLocal
 from models import User
@@ -17,7 +16,7 @@ from sqlalchemy.orm import Session
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env") # 絶対パス
 
 # 秘密鍵（サーバーだけが知っているキー）
-SECRET_KEY = os.getenv('SATELLITE_FARM_ANALYSIS_JWT_SECRET_KEY') # 必ず環境変数から読み込むべし
+SECRET_KEY = os.getenv('JWT_SECRET_KEY') # 必ず環境変数から読み込むべし
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
