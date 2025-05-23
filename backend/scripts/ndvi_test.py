@@ -57,8 +57,6 @@ print(pd.DataFrame(pd.Series(ndvi.ravel()).describe()).transpose())
 
 #################### NDVIの可視化ココカラ ####################
 
-import matplotlib.pyplot as plt
-
 # NDVIを可視化
 fig = plt.figure(figsize=(40, 30))
 # fig = plt.figure(figsize=(8, 6))
