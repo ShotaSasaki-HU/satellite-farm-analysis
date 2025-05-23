@@ -111,5 +111,5 @@ def logout(response: Response):
     return {"message": "ログアウトしました"}
 
 # 開発用サーバー起動
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="localhost", port=8000, reload=True)
