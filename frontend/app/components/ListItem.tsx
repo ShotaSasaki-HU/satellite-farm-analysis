@@ -25,12 +25,12 @@ export default function ListItem({
             onClick={onClick}
         >
             <div className="flex-1 flex flex-col items-start">
-                <span className="text-lg">{main}</span>
+                <span className="text-lg font-bold">{main}</span>
                 <span className="text-base">{sub}</span>
             </div>
             {rightElement &&
                 <button
-                    className="w-[25%] text-green-600 flex justify-center items-center"
+                    className="w-[25%] flex justify-center items-center"
                     onClick={(e) => {
                         e.stopPropagation(); // ← liのonClickを止める（重要）
                         onRightClick?.(e);

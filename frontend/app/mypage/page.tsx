@@ -4,7 +4,7 @@
 import "tailwindcss"; // globals.cssが効いてない？
 
 import { useState, useEffect, useRef } from "react";
-import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus, Trash2, LoaderCircle } from "lucide-react";
+import { User, Map, ChartLine, CircleChevronLeft, CircleChevronRight, LogOut, FolderPlus, Trash2, LoaderCircle, LockKeyhole } from "lucide-react";
 import dynamic from "next/dynamic";
 import ListItem from "../components/ListItem";
 import { FeatureCollection } from "geojson";
@@ -152,6 +152,21 @@ export default function Mypage() {
         await fetchGetGroupedAoi(); // ボタンを更新するため．
     };
 
+    function getStatusLabel(status: string): string {
+        switch (status) {
+            case "unprocessed":
+                return "農地未確定・未分析";
+            case "processing":
+                return "農地確定済み・分析中";
+            case "completed":
+                return "農地確定済み・分析完了";
+            case "failed":
+                return "農地確定済み・分析失敗";
+            default:
+                return "不明";
+        }
+    }
+
     return (
         <div className="flex h-screen">
             {/* Sidebar */}
@@ -207,6 +222,7 @@ export default function Mypage() {
                         <h1 className="text-3xl font-bold text-green-800 italic">Agri-Eye</h1>
                         <p className="text-xl">{userName} 様</p>
                     </div>
+
                     {selectedSidebar === "account" && (
                         <div>
                             <div className="text-center mb-6">
@@ -234,6 +250,7 @@ export default function Mypage() {
                             <hr className="border-t border-gray-300" />
                         </div>
                     )}
+
                     {selectedSidebar === "map" && (
                         <div> {/* divタグ消しちゃだめ？ */}
                             <h1 className="text-3xl font-bold text-green-800 text-center">農地を選ぶ</h1>
@@ -258,7 +275,8 @@ export default function Mypage() {
                                     <span>：畑（選択中）</span>
                                 </li>
                             </ul>
-                            <p className="text-right">※グループ名を変更したい場合は，グループ名をダブルクリックして下さい．</p>
+                            <p className="">※グループ名を変更したい場合は，グループ名をダブルクリックして下さい．</p>
+                            <p className="">※農地確定済みのグループは編集できません．</p>
                             <div className="flex border-1 border-gray-400">
                                 {/* React Leaflet */}
                                 <MapViewer
@@ -316,11 +334,11 @@ export default function Mypage() {
                                                         </span>
                                                     )
                                                 }
-                                                sub={`id: ${group.id.toString()}, count: ${group.featureCollection ? group.featureCollection.features.length : 0}`}
+                                                sub={getStatusLabel(group.status)}
                                                 className={`flex justify-between items-center px-3 py-2 m-1 cursor-pointer border-2 rounded-xl hover:border-green-300 ${selectedGA === group.id ? "bg-green-100 border-green-300" : "border-gray-300"}`}
                                                 onClick={() => setSelectedGA(group.id)}
-                                                rightElement={null}
-                                                onRightClick={() => console.log("右の要素がクリックされた")}
+                                                rightElement={group.status !== "unprocessed" && <LockKeyhole className="w-6 h-6"/>}
+                                                onRightClick={() => {}}
                                             />
                                         ))}
 
@@ -359,6 +377,7 @@ export default function Mypage() {
                             </div>
                         </div>
                     )}
+
                     {selectedSidebar === "analyze" && (
                         <div className="text-center">
                             <h1 className="text-3xl font-bold text-green-800">農地を分析する</h1>
@@ -373,12 +392,15 @@ export default function Mypage() {
                                         <h3 className="text-lg font-bold">{group.name}</h3>
 
                                         {group.status === "unprocessed" && (
-                                            <button
-                                                onClick={() => startAnalysis(group.id)}
-                                                className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                                            >
-                                                分析開始
-                                            </button>
+                                            <div className="mt-2">
+                                                <p className="text-red-600">※農地確定を行うと，このグループの農地は選び直せなくなります．</p>
+                                                <button
+                                                    onClick={() => startAnalysis(group.id)}
+                                                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                                >
+                                                    農地確定・分析開始
+                                                </button>
+                                            </div>
                                         )}
 
                                         {group.status === "processing" && (
@@ -387,7 +409,7 @@ export default function Mypage() {
                                                 className="mt-2 px-4 py-2 bg-yellow-500 text-white rounded cursor-not-allowed"
                                             >
                                                 <div className="flex justify-center items-center">
-                                                    <span className="mr-2">分析中…</span>
+                                                    <span className="mr-2">農地確定済み・分析中…</span>
                                                     <LoaderCircle className="w-6 h-6 animate-spin" />
                                                 </div>
                                             </button>
@@ -398,7 +420,7 @@ export default function Mypage() {
                                                 disabled
                                                 className="mt-2 px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed"
                                             >
-                                                分析済み
+                                                農地確定済み・分析完了
                                             </button>
                                         )}
 
@@ -409,7 +431,7 @@ export default function Mypage() {
                                                     onClick={() => startAnalysis(group.id)}
                                                     className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
                                                 >
-                                                    再分析
+                                                    農地確定済み・再分析
                                                 </button>
                                             </div>
                                         )}
