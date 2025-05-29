@@ -10,7 +10,7 @@ tmux send-keys -t $SESSION 'redis-server' C-m
 
 # Celery
 tmux new-window -t $SESSION:1 -n 'celery'
-tmux send-keys -t $SESSION 'cd backend && source venv/bin/activate && celery -A celery_app.celery_app worker --loglevel=info' C-m
+tmux send-keys -t $SESSION 'cd backend && source venv/bin/activate && celery -A celery_app worker --loglevel=info' C-m
 
 # Backend
 tmux new-window -t $SESSION:2 -n 'backend'
