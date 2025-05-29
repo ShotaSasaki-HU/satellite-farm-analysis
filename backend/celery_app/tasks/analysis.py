@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env")
 PLANET_API_KEY = os.getenv('PLANET_API_KEY') # 必ず環境変数から読み込むべし
 
-# Planet社のAPIを使って，一つの筆ポリゴンについて画像の取得を行う．
+# Planet社のAPIを使って，1つの筆ポリゴンについて画像の取得を行う．
 @celery.task
 def run_analysis_task(fude_uuid: str):
     logger.info(f"開始: fude_uuid={fude_uuid}")
@@ -60,7 +60,7 @@ def run_analysis_task(fude_uuid: str):
             "field_name": "acquired",
             "config": {
                 "gte": datetime(dt_now.year, 1, 1, tzinfo=JST).isoformat(),
-                "lte": dt_now.isoformat()
+                "lte": (dt_now  - timedelta(days = 1)).isoformat() # Planetの衛星データの更新にかかる時間を考慮して1日引く．
             }
         }
         logger.info(date_range_filter)
