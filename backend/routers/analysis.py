@@ -7,7 +7,8 @@ from models import GroupedAoi, User
 from database import SessionLocal
 from typing import Annotated
 from auth import get_current_user
-from celery_app.tasks.analysis import run_analysis_task
+from celery_app.tasks.analysis import run_analysis_task, update_group_status
+from celery import chord
 
 router = APIRouter()
 
@@ -26,17 +27,20 @@ def start_analysis(
     db: db_dependency,
     current_user: User = Depends(get_current_user)
 ):
-    group = db.query(GroupedAoi).filter_by(id=group_id, user_id=current_user.id).first()
+    group = db.query(GroupedAoi).filter_by(id=group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="グループが見つかりませんでした．")
     if group.status == "processing":
         raise HTTPException(status_code=409, detail="このグループは既に分析中です．")
     
-    # group.status = "processing"
+    group.status = "processing"
     db.commit()
 
-    # Celeryに非同期処理を投げる．
-    for fude in group.fudes:
-        run_analysis_task.delay(fude.uuid)
+    # 各筆に対する実行計画を作る．s（シグネチャ）で束ねておく．
+    header = [run_analysis_task.s(fude.uuid) for fude in group.fudes]
+    # 全部終わった後に呼ばれるコールバック
+    callback = update_group_status.s(group_id)
+    # chordでまとめて実行．第一引数にheaderの戻り値リストが自動で入る．
+    chord(header)(callback)
     
     return {"message": f"{len(group.fudes)} tasks started"}

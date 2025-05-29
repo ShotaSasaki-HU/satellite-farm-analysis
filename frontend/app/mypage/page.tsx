@@ -63,7 +63,7 @@ export default function Mypage() {
         const intervalId = setInterval(() => {
             fetchGetGroupedAoi();
             console.log("Interval Signal");
-        }, 60 * 1000);
+        }, 30 * 1000);
 
         return () => clearInterval(intervalId); // アンマウント時にクリア
     }, []); // 空の配列は「最初の1回だけ実行する」という意味。変数を入れとくとそれを監視して更新してくれる。
