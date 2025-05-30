@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Fude, GroupedAoi, ImageGetLog
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone, time
+from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -52,41 +53,27 @@ def run_analysis_task(fude_uuid: str):
         }
 
         # filter images acquired in a certain date range
-        # ひとまず，元旦から実行日までを取得範囲とする．
-        JST = timezone(timedelta(hours=9))
-        dt_now = datetime.now(JST)
+        missing_ranges = get_missing_date_ranges(fude_uuid=fude_uuid, db=db)
+        date_filters = [] # 日付範囲のフィルター（複数可）
 
-        # Planetの衛星データの更新にかかる時間を考慮して終端は当日から1日引く．
-        lte = dt_now - timedelta(days = 1)
+        for gte_date, lte_date in missing_ranges:
+            gte = datetime.combine(gte_date, time.min).isoformat()
+            lte = datetime.combine(lte_date, time.max).isoformat()
 
-        # この筆ポリゴンに関するImageGetLogの中で最新のtarget_dateを探す．
-        latest_log = (
-            db.query(ImageGetLog)
-            .filter(ImageGetLog.polygon_uuid == fude_uuid)
-            .order_by(ImageGetLog.target_date.desc())
-            .first()
-        )
-
-        # gteの決定
-        if latest_log:
-            # 最終取得日の翌日から取得する．
-            gte = latest_log.target_date + timedelta(days = 1)
-        else:
-            # データが無ければ1月1日から．
-            gte = datetime(dt_now.year, 1, 1, tzinfo=JST)
-
-        # 日付の始点と終点が逆転していたら処理不要．（そんな事が起こり得るのかは未検証）
-        if gte > lte:
-            logger.info(f"{fude_uuid}: 最新画像取得済みのためスキップ")
-            return "ok"
-
-        date_range_filter = {
-            "type": "DateRangeFilter",
-            "field_name": "acquired",
-            "config": {
-                "gte": gte.isoformat(),
-                "lte": lte.isoformat()
+            date_range_filter = {
+                "type": "DateRangeFilter",
+                "field_name": "acquired",
+                "config": {
+                    "gte": gte,
+                    "lte": lte
+                }
             }
+            date_filters.append(date_range_filter)
+        
+        # OrFilterで日付条件をまとめる．
+        combined_date_filter = {
+            "type": "OrFilter",
+            "config": date_filters
         }
         
         # filter any images which are more than 50% clouds
@@ -102,7 +89,11 @@ def run_analysis_task(fude_uuid: str):
         # could also use an "OrFilter"
         redding_reservoir = {
             "type": "AndFilter",
-            "config": [geometry_filter, date_range_filter] # , cloud_cover_filter]
+            "config": [
+                geometry_filter,
+                combined_date_filter,
+                # cloud_cover_filter
+            ]
         }
 
         logger.info(json.dumps(redding_reservoir, indent=2))
@@ -117,6 +108,44 @@ def run_analysis_task(fude_uuid: str):
         return "error"
     finally:
         db.close()
+
+def get_missing_date_ranges(fude_uuid: str, db: Session) -> List[Tuple[date, date]]:
+    """
+    指定された筆ポリゴンについて，ImageGetLogに存在しない未取得日の間欠連続範囲（gte, lte）を返す．
+    """
+    JST = timezone(timedelta(hours=9))
+    today = datetime.now(JST).date()
+    start_of_year = date(today.year, 1, 1)
+
+    # 今年の全日（集合）
+    all_dates = {start_of_year + timedelta(days=i) for i in range((today - start_of_year).days + 1)}
+
+    # DBから画像取得を試行済みの日付を得る．
+    tried_dates = db.query(ImageGetLog.target_date).filter(ImageGetLog.polygon_uuid == fude_uuid).all()
+    tried_dates_set = {row[0] for row in tried_dates}
+
+    # 差集合
+    missing_dates = sorted(all_dates - tried_dates_set) # 昇順
+    
+    # 空なら終了
+    if not missing_dates:
+        return []
+    
+    # 連続した日付をまとめる．
+    date_ranges = []
+    range_start = missing_dates[0]
+    range_end = missing_dates[0]
+
+    for d in missing_dates[1:]:
+        if d == range_end + timedelta(days=1):
+            range_end = d
+        else:
+            date_ranges.append((range_start, range_end))
+            range_start = range_end = d # 新しい範囲
+    # for文を抜けた時点で必ずappendしていない範囲が余っている．
+    date_ranges.append((range_start, range_end))
+
+    return date_ranges
 
 @celery.task
 def update_group_status(results, group_id: int):
