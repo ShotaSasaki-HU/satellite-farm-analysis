@@ -12,6 +12,7 @@ from datetime import date, datetime, timedelta, timezone, time
 from typing import List, Tuple
 import requests
 from requests.auth import HTTPBasicAuth
+from time import sleep
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +121,7 @@ def run_analysis_task(fude_uuid: str, user_id: int):
                 auth = HTTPBasicAuth(PLANET_API_KEY, ''),
                 json = stats_endpoint_request
             )
+        sleep(1)
         
         hit_count = 0
         for bucket in result.json()["buckets"]:
@@ -134,12 +136,15 @@ def run_analysis_task(fude_uuid: str, user_id: int):
           "filter": redding_reservoir
         }
 
+        auth = HTTPBasicAuth(PLANET_API_KEY, '')
+
         result = \
             requests.post(
                 'https://api.planet.com/data/v1/quick-search',
-                auth = HTTPBasicAuth(PLANET_API_KEY, ''),
+                auth = auth,
                 json = search_endpoint_request
             )
+        sleep(1)
         result_json = result.json()
 
         TEMPFILE_DIR = BACKEND_DIR / "tempfiles"
@@ -160,10 +165,8 @@ def run_analysis_task(fude_uuid: str, user_id: int):
                 if not next_url:
                     break # 最後のページ
 
-                result = requests.get(
-                    next_url,
-                    auth = HTTPBasicAuth(PLANET_API_KEY, '')
-                )
+                result = requests.get(next_url, auth=auth)
+                sleep(1)
                 result_json = result.json()
 
         logger.info(f"Quick Search: {count}件")
