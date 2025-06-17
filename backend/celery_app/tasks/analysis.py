@@ -69,7 +69,7 @@ def run_analysis_task(fude_uuid: str, user_id: int):
                 "field_name": "acquired",
                 "config": {
                     # "gte": gte,
-                    "gte": "2020-05-19T00:00:00.000+09:00",
+                    "gte": "2024-06-16T00:00:00.000+09:00",
                     "lte": lte
                 }
             }
@@ -144,7 +144,7 @@ def run_analysis_task(fude_uuid: str, user_id: int):
                 auth = auth,
                 json = search_endpoint_request
             )
-        sleep(1)
+        sleep(1.5)
         result_json = result.json()
 
         TEMPFILE_DIR = BACKEND_DIR / "tempfiles"
@@ -166,7 +166,7 @@ def run_analysis_task(fude_uuid: str, user_id: int):
                     break # 最後のページ
 
                 result = requests.get(next_url, auth=auth)
-                sleep(1)
+                sleep(1.5)
                 result_json = result.json()
 
         logger.info(f"Quick Search: {count}件")
