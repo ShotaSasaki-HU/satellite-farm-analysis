@@ -37,7 +37,7 @@ def start_analysis(
     db.commit()
 
     # 各筆に対する実行計画を作る．s（シグネチャ）で束ねておく．
-    header = [run_analysis_task.s(fude.uuid) for fude in group.fudes]
+    header = [run_analysis_task.s(fude.uuid, current_user.id) for fude in group.fudes]
     # 全部終わった後に呼ばれるコールバック
     callback = update_group_status.s(group_id)
     # chordでまとめて実行．第一引数にheaderの戻り値リストが自動で入る．

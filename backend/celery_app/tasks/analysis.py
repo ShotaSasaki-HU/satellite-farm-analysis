@@ -15,12 +15,13 @@ from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
 
-load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent.parent / ".env")
+BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+load_dotenv(dotenv_path=BACKEND_DIR / ".env")
 PLANET_API_KEY = os.getenv('PLANET_API_KEY') # 必ず環境変数から読み込むべし
 
 # Planet社のAPIを使って，1つの筆ポリゴンについて画像の取得を行う．
 @celery.task
-def run_analysis_task(fude_uuid: str):
+def run_analysis_task(fude_uuid: str, user_id: int):
     logger.info(f"開始: fude_uuid={fude_uuid}")
 
     db: Session = SessionLocal()
@@ -66,7 +67,8 @@ def run_analysis_task(fude_uuid: str):
                 "type": "DateRangeFilter",
                 "field_name": "acquired",
                 "config": {
-                    "gte": gte,
+                    # "gte": gte,
+                    "gte": "2020-05-19T00:00:00.000+09:00",
                     "lte": lte
                 }
             }
@@ -102,7 +104,7 @@ def run_analysis_task(fude_uuid: str):
 
         #################### 検索フィルターの定義ココマデ ####################
 
-        #################### 検索のヒット件数ココカラ ####################
+        #################### 検索ココカラ ####################
 
         # Stats API request object
         stats_endpoint_request = {
@@ -124,7 +126,53 @@ def run_analysis_task(fude_uuid: str):
             hit_count += bucket["count"]
         logger.info(f"ヒット件数: {hit_count}件")
 
-        #################### 検索のヒット件数ココマデ ####################
+        ### 実際に検索（Quick Search）を実行 ###
+
+        # Search API request object
+        search_endpoint_request = {
+          "item_types": ["PSScene"],
+          "filter": redding_reservoir
+        }
+
+        result = \
+            requests.post(
+                'https://api.planet.com/data/v1/quick-search',
+                auth = HTTPBasicAuth(PLANET_API_KEY, ''),
+                json = search_endpoint_request
+            )
+        result_json = result.json()
+
+        TEMPFILE_DIR = BACKEND_DIR / "tempfiles"
+        TEMPFILE_DIR.mkdir(exist_ok=True) # 存在しなければ作成
+
+        # features配列から各オブジェクトのidフィールドを抽出してテキストファイルに出力
+        path_ids = TEMPFILE_DIR / f"PSScene_ids_{fude_uuid}_user{user_id}.txt"
+
+        count = 0
+        with open(path_ids, mode='w') as f:
+            while True:
+                for feature in result_json.get('features', []):
+                    f.write(feature.get('id') + '\n')
+                    count += 1
+                
+                # 次のページがあれば取得
+                next_url = result_json["_links"]["_next"]
+                if not next_url:
+                    break # 最後のページ
+
+                result = requests.get(
+                    next_url,
+                    auth = HTTPBasicAuth(PLANET_API_KEY, '')
+                )
+                result_json = result.json()
+
+        logger.info(f"Quick Search: {count}件")
+
+        #################### 検索ココマデ ####################
+
+        #################### ダウンロード前の準備ココカラ ####################
+
+        #################### ダウンロード前の準備ココマデ ####################
 
         logger.info(f"完了: fude_uuid={fude_uuid}")
 
