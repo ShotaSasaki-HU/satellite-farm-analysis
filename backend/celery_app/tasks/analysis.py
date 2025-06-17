@@ -10,6 +10,8 @@ from models import Fude, GroupedAoi, ImageGetLog
 import json
 from datetime import date, datetime, timedelta, timezone, time
 from typing import List, Tuple
+import requests
+from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +59,8 @@ def run_analysis_task(fude_uuid: str):
         date_filters = [] # 日付範囲のフィルター（複数可）
 
         for gte_date, lte_date in missing_ranges:
-            gte = datetime.combine(gte_date, time.min).isoformat()
-            lte = datetime.combine(lte_date, time.max).isoformat()
+            gte = datetime.combine(gte_date, time.min).isoformat() + "+09:00"
+            lte = datetime.combine(lte_date, time.max).isoformat() + "+09:00"
 
             date_range_filter = {
                 "type": "DateRangeFilter",
@@ -76,14 +78,14 @@ def run_analysis_task(fude_uuid: str):
             "config": date_filters
         }
         
-        # filter any images which are more than 50% clouds
-        # cloud_cover_filter = {
-        #     "type": "RangeFilter",
-        #     "field_name": "cloud_cover",
-        #     "config": {
-        #         "lte": 0.9 # 全体の雲量が50%とかでもAOIは写ってたりするため。
-        #     }
-        # }
+        # only get images which have <90% cloud coverage
+        cloud_cover_filter = {
+            "type": "RangeFilter",
+            "field_name": "cloud_cover",
+            "config": {
+                "lte": 0.90 # 全体の雲量が50%とかでもAOIは写ってたりするため。
+            }
+        }
 
         # create a filter that combines our geo and date filters
         # could also use an "OrFilter"
@@ -92,13 +94,37 @@ def run_analysis_task(fude_uuid: str):
             "config": [
                 geometry_filter,
                 combined_date_filter,
-                # cloud_cover_filter
+                cloud_cover_filter
             ]
         }
 
-        logger.info(json.dumps(redding_reservoir, indent=2))
+        # logger.info(json.dumps(redding_reservoir, indent=2))
 
         #################### 検索フィルターの定義ココマデ ####################
+
+        #################### 検索のヒット件数ココカラ ####################
+
+        # Stats API request object
+        stats_endpoint_request = {
+            "interval": "year", # day, month, yearとか．bucketsの区切り方が変わる．
+            "item_types": ["PSScene"],
+            "filter": redding_reservoir
+        }
+
+        # fire off the POST request
+        result = \
+            requests.post(
+                'https://api.planet.com/data/v1/stats',
+                auth = HTTPBasicAuth(PLANET_API_KEY, ''),
+                json = stats_endpoint_request
+            )
+        
+        hit_count = 0
+        for bucket in result.json()["buckets"]:
+            hit_count += bucket["count"]
+        logger.info(f"ヒット件数: {hit_count}件")
+
+        #################### 検索のヒット件数ココマデ ####################
 
         logger.info(f"完了: fude_uuid={fude_uuid}")
 
@@ -159,7 +185,8 @@ def update_group_status(results, group_id: int):
         if group:
             # resultsには各run_analysis_taskの戻り値が入っている．
             if all(res == "ok" for res in results):
-                group.status = "completed"
+                # group.status = "completed"
+                group.status = "unprocessed"
             else:
                 group.status = "failed"
             db.commit()
