@@ -4,3 +4,4 @@ __pycache__/
 .env
 agri_eye.db
 agri_eye.db-journal
+tempfiles/
