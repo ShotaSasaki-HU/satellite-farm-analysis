@@ -68,8 +68,8 @@ def run_analysis_task(fude_uuid: str, user_id: int):
                 "type": "DateRangeFilter",
                 "field_name": "acquired",
                 "config": {
-                    # "gte": gte,
-                    "gte": "2024-06-16T00:00:00.000+09:00",
+                    "gte": gte,
+                    # "gte": "2024-06-16T00:00:00.000+09:00",
                     "lte": lte
                 }
             }
@@ -236,8 +236,7 @@ def update_group_status(results, group_id: int):
         if group:
             # resultsには各run_analysis_taskの戻り値が入っている．
             if all(res == "ok" for res in results):
-                # group.status = "completed"
-                group.status = "unprocessed"
+                group.status = "completed"
             else:
                 group.status = "failed"
             db.commit()
