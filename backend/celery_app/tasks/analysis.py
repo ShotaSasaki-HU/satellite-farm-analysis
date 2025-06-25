@@ -43,7 +43,7 @@ def run_analysis_task(fude_uuid: str, user_id: int):
         target_feature = geojson["features"][fude.features_index] # 今見ている筆ポリゴンを抽出
         coordinates = target_feature["geometry"]["coordinates"]
 
-        #################### 検索フィルターの定義ココカラ ####################
+        ########## 検索フィルターの定義ココカラ ##########
         geo_json_geometry = {
             "type": "Polygon",
             "coordinates": coordinates
@@ -103,9 +103,9 @@ def run_analysis_task(fude_uuid: str, user_id: int):
 
         # logger.info(json.dumps(redding_reservoir, indent=2))
 
-        #################### 検索フィルターの定義ココマデ ####################
+        ########## 検索フィルターの定義ココマデ ##########
 
-        #################### 検索ココカラ ####################
+        ########## 検索ココカラ ##########
 
         # Stats API request object
         stats_endpoint_request = {
@@ -171,11 +171,11 @@ def run_analysis_task(fude_uuid: str, user_id: int):
 
         logger.info(f"Quick Search: {count}件")
 
-        #################### 検索ココマデ ####################
+        ########## 検索ココマデ ##########
 
-        #################### ダウンロード前の準備ココカラ ####################
+        ########## ダウンロード前の準備ココカラ ##########
 
-        #################### ダウンロード前の準備ココマデ ####################
+        ########## ダウンロード前の準備ココマデ ##########
 
         logger.info(f"完了: fude_uuid={fude_uuid}")
 
@@ -197,8 +197,15 @@ def get_missing_date_ranges(fude_uuid: str, db: Session) -> List[Tuple[date, dat
     # 今年の全日（集合）
     all_dates = {start_of_year + timedelta(days=i) for i in range((today - start_of_year).days + 1)}
 
-    # DBから画像取得を試行済みの日付を得る．
-    tried_dates = db.query(ImageGetLog.target_date).filter(ImageGetLog.polygon_uuid == fude_uuid).all()
+    # DBから画像取得を試行済み・試行中の日付を得る．
+    tried_dates = db.query(ImageGetLog.target_date).filter(
+        ImageGetLog.polygon_uuid == fude_uuid,
+        ImageGetLog.status.in_([
+            ImageGetLogStatus.processing,
+            ImageGetLogStatus.completed
+            # failedの場合は，再取得する必要があるためココに書かない．
+        ])
+    ).all()
     tried_dates_set = {row[0] for row in tried_dates}
 
     # 差集合
@@ -207,6 +214,33 @@ def get_missing_date_ranges(fude_uuid: str, db: Session) -> List[Tuple[date, dat
     # 空なら終了
     if not missing_dates:
         return []
+    
+    ########## ImageGetLogテーブルにおけるstatusの更新ココカラ ##########
+
+    # JST現在時刻（チェックタイムスタンプとして）
+    now = datetime.now(JST)
+
+    # 一括でオブジェクト作成
+    new_logs = [
+        ImageGetLog(
+            polygon_uuid = fude_uuid,
+            target_date = target_date,
+            data_exists = False, # 後で絶対に書き換えること．SQLiteでnull制約を変更するのが手間過ぎる．
+            scene_id = None,
+            acquired_date = None,
+            file_path = None,
+            udm2_path = None,
+            checked_at = now,
+            status = ImageGetLogStatus.processing
+        )
+        for target_date in missing_dates
+    ]
+
+    # 一括挿入
+    db.bulk_save_objects(new_logs)
+    db.commit()
+
+    ########## ImageGetLogテーブルにおけるstatusの更新ココマデ ##########
     
     # 連続した日付をまとめる．
     date_ranges = []

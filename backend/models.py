@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index, Date, DateTime, Boolean, Enum
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index, Date, DateTime, Boolean, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from database import Base # database.py
 # from sqlalchemy.dialects.postgresql import UUID
@@ -71,14 +71,18 @@ class ImageGetLog(Base):
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     polygon_uuid = Column(String, ForeignKey("fudes.uuid"), nullable=False, index=True) # 筆ポリゴンのuuid
     target_date = Column(Date, nullable=False)      # ユーザーが要求した日付
-    data_exists = Column(Boolean, nullable=False)   # Planetに画像が存在するか．
+    data_exists = Column(Boolean, nullable=False)    # Planetに画像が存在するか．
     scene_id = Column(String, nullable=True)        # シーン（元の一枚絵）のid
     acquired_date = Column(DateTime, nullable=True) # 画像の撮影日時（JST）
     file_path = Column(String, nullable=True)       # 画像のパス
     udm2_path = Column(String, nullable=True)       # UDM2のパス
     checked_at = Column(DateTime, nullable=False)   # このログの記録日時（JST）
-    status = Column(Enum(ImageGetLogStatus), nullable=False, default=ImageGetLogStatus.processing) # 状態
+    status = Column(Enum(ImageGetLogStatus), nullable=False, default=ImageGetLogStatus.processing, index=True) # 状態
 
     # target_dateとchecked_atが近すぎる場合，まだ画像が公開されてないだけの可能性がある点に留意．
 
     fude = relationship("Fude", back_populates="image_logs")
+
+    __table_args__ = (
+        UniqueConstraint("polygon_uuid", "target_date", name="uq_polygon_targetdate"),
+    )
