@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index, Date, DateTime, Boolean
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table, Index, Date, DateTime, Boolean, Enum
 from sqlalchemy.orm import relationship
 from database import Base # database.py
 # from sqlalchemy.dialects.postgresql import UUID
+import enum
 
 # 中間テーブル（多対多：GroupedAoi と Fude）
 grouped_aoi_fudes = Table(
@@ -41,17 +42,28 @@ class Fude(Base):
         Index("idx_lat_lon", "centroid_lat", "centroid_lon"),
     )
 
+class GroupedAoiStatus(str, enum.Enum):
+    unprocessed = "unprocessed"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+
 class GroupedAoi(Base):
     __tablename__ = "grouped_aois"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
-    status = Column(String, nullable=False)
+    status = Column(Enum(GroupedAoiStatus), nullable=False, default=GroupedAoiStatus.unprocessed)
     analysis_start_date = Column(Date, nullable=False) # 分析始点日（とりあえずその年の元旦とする．）
 
     user = relationship("User", back_populates="grouped_aois")
     fudes = relationship("Fude", secondary=grouped_aoi_fudes, back_populates="grouped_aois")
+
+class ImageGetLogStatus(str, enum.Enum):
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
 
 class ImageGetLog(Base):
     __tablename__ = "image_get_logs"
@@ -65,6 +77,7 @@ class ImageGetLog(Base):
     file_path = Column(String, nullable=True)       # 画像のパス
     udm2_path = Column(String, nullable=True)       # UDM2のパス
     checked_at = Column(DateTime, nullable=False)   # このログの記録日時（JST）
+    status = Column(Enum(ImageGetLogStatus), nullable=False, default=ImageGetLogStatus.processing) # 状態
 
     # target_dateとchecked_atが近すぎる場合，まだ画像が公開されてないだけの可能性がある点に留意．
 

@@ -6,7 +6,7 @@ import os
 import logging
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Fude, GroupedAoi, ImageGetLog
+from models import Fude, GroupedAoi, GroupedAoiStatus, ImageGetLog, ImageGetLogStatus
 import json
 from datetime import date, datetime, timedelta, timezone, time
 from typing import List, Tuple
@@ -236,9 +236,9 @@ def update_group_status(results, group_id: int):
         if group:
             # resultsには各run_analysis_taskの戻り値が入っている．
             if all(res == "ok" for res in results):
-                group.status = "completed"
+                group.status = GroupedAoiStatus.completed
             else:
-                group.status = "failed"
+                group.status = GroupedAoiStatus.failed
             db.commit()
             
     except Exception as e:

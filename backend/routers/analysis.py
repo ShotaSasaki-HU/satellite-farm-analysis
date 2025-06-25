@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from models import GroupedAoi, User
+from models import GroupedAoi, GroupedAoiStatus, User
 from database import SessionLocal
 from typing import Annotated
 from auth import get_current_user
@@ -30,10 +30,10 @@ def start_analysis(
     group = db.query(GroupedAoi).filter_by(id=group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="グループが見つかりませんでした．")
-    if group.status == "processing":
+    if group.status == GroupedAoiStatus.processing:
         raise HTTPException(status_code=409, detail="このグループは既に分析中です．")
     
-    group.status = "processing"
+    group.status = GroupedAoiStatus.processing
     db.commit()
 
     # 各筆に対する実行計画を作る．s（シグネチャ）で束ねておく．
