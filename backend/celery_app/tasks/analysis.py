@@ -63,6 +63,7 @@ def run_analysis_task(fude_uuid: str, user_id: int):
         for gte_date, lte_date in missing_ranges:
             gte = datetime.combine(gte_date, time.min).isoformat() + "+09:00"
             lte = datetime.combine(lte_date, time.max).isoformat() + "+09:00"
+            print(gte, lte)
 
             date_range_filter = {
                 "type": "DateRangeFilter",
